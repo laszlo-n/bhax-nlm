@@ -34,4 +34,28 @@
             Aktualizálás, javítások.
         </revremark>
     </revision>
+    <revision>
+        <revnumber>0.0.5</revnumber>
+        <date>2019-03</date>
+        <authorinitials>nlm</authorinitials>
+        <revremark>
+            2. és 3. fejezet kitöltése
+        </revremark>
+    </revision>
+    <revision>
+        <revnumber>0.0.6</revnumber>
+        <date>2019-04</date>
+        <authorinitials>nlm</authorinitials>
+        <revremark>
+            4., 5., 6. fejezet kitöltése
+        </revremark>
+    </revision>
+    <revision>
+        <revnumber>0.0.7</revnumber>
+        <date>2019-05</date>
+        <authorinitials>nlm</authorinitials>
+        <revremark>
+            7., 8., 9. fejezet kitöltése
+        </revremark>
+    </revision>
 </revhistory>

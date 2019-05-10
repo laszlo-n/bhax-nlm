@@ -25,5 +25,19 @@
                 <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/">https://arato.inf.unideb.hu/batfai.norbert/</link>
             </otheraddr>
         </address>
-    </author>    
+    </author>  
+    <author>
+        <personname>
+            <surname>Nagy</surname>
+            <firstname>László Mihály</firstname>        
+        </personname>    
+        <affiliation>
+            <jobtitle>hallgató</jobtitle>
+            <orgname>Debreceni Egyetem</orgname>
+            <orgdiv>Informatikai Kar, Programtervező Informatikus szak</orgdiv>
+            <address>
+                <email>laszlo.nagy.98@gmail.com</email>
+            </address>
+        </affiliation>
+    </author>   
 </authorgroup>
