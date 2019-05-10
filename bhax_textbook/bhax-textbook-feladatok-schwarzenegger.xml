@@ -7,80 +7,62 @@
     </info>
     <section>
         <title>Szoftmax Py MNIST</title>
-        <para>aa
-            Python
+        <para>
+            Megoldás forrása: <filename>/book_sources/fejezet8/szoftmax.py</filename> <link xlink:href="https://www.geeksforgeeks.org/softmax-regression-using-tensorflow/">https://www.geeksforgeeks.org/softmax-regression-using-tensorflow/</link>
         </para>
         <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Az MNIST egy klasszikus ML kezdőfeladat. Cél hogy felismerjünk kézzel írt számjegyeket 0 és 9 között. Ezt a feladatot classifyingnak nevezzünk, azaz osztályozásnak - ennek a folyamatnak a során a bemenet pixeleiből eldöntjük hogy a 10 számjegy-kategóriából melyikbe mennyi eséllyel tartozik az adott kép.
+
+A működés alapvetőségének megfelelően triviális. Van egy bemeneti mátrixunk ahova az adott kép pixeleit töltjük be, egy átmeneti layerünk, és egy kimeneti layerünk, illetve ezek között súlyok.
+
+A súlyokat fokozatosan fogjuk változtatni az alapján, hogy az ún. training set-ben az adott mintaképhez milyen mintamegoldás tartozik. Ezt a folyamatot backpropagation-nek hívjuk. Magát az algoritmust pedig gradient descent-nek nevezzük.
+
+Az MNIST példaadatbázis 28x28 méretű kézzel írt számjegyeket tartalmaz, több tízezret. Segítségével ez a kód kb. 85%-os hatékonysággal képes megtanulni a számjegyek elolvasását.
         </para>
     </section>        
 
     <section>
         <title>Szoftmax R MNIST</title>
         <para>
-            R            
+            Megoldás forrása: <filename>/book_sources/fejezet8/softmax.r</filename> <link xlink:href="https://tensorflow.rstudio.com/tensorflow/articles/tutorial_mnist_beginners.html">https://tensorflow.rstudio.com/tensorflow/articles/tutorial_mnist_beginners.html</link>
         </para>
         <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Tök ugyanazt csinálja mint az előző Python-os példa, csak kicsit tömörebben, mivel az R statisztikai használatra specializált nyelv/eszköz.
         </para>
     </section>        
 
     <section>
         <title>Mély MNIST</title>
         <para>
-            Python            
+            Megoldás forrása: <link xlink:href=" https://github.com/tensorflow/tensorflow/blob/r1.4/tensorflow/examples/tutorials/mnist/mnist_deep.py">https://github.com/tensorflow/tensorflow/blob/r1.4/tensorflow/examples/tutorials/mnist/mnist_deep.py</link>
         </para>
         <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Azért deep, mert ún. deep learningről van itt szó. Itt extra ún. hidden layer-ek, konvolúciós neurális hálók is részt vesznek a feldolgozásban. Az alapvetés azonban továbbra is változatlan.
+
+Kifinomultságának köszönhetően ez már magasabb accuracy-t ér el a teszteken, ezért érdemes használni.
         </para>
     </section>        
 
     <section>
         <title>Deep dream</title>
         <para>
-            Keras            
+            A Deep Dream egy kísérleti projekt volt a Google-nél, mintákat lát bele képekbe előre betanított képek alapján. Attól függően milyen a training set, más-más dolgokat lát bele a képekbe. A végeredmény jellemzően meglehetősen "trippy".
+
+Kipróbálható a https://deepdreamgenerator.com/ weboldalon.
         </para>
-        <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
-    </section>        
-                  
+    </section>
     <section>
-        <title>Robotpszichológia</title>
+        <title>Minecraft MALMÖ</title>
         <para>
         </para>
         <para>
             Megoldás videó:
         </para>
         <para>
-            Megoldás forrása:                
+            Megoldás forrása: <link xlink:href="https://github.com/Microsoft/malmo">https://github.com/Microsoft/malmo</link>
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            A Project Malmö egy Minecraft-ot játszó AI ágens, tetszőleges feladatra betanítható.
         </para>
     </section>        
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
