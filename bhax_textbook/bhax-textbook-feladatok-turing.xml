@@ -12,23 +12,16 @@
             100 százalékban minden magot!
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: /bhax_sources/fejezet2/vegtelen_ciklus_1szal.c; /bhax_sources/fejezet2/vegtelen_ciklus_sokszal.c; /bhax_sources/fejezet2/vegtelen_ciklus_noload.c
         </para>
         <para>
-            Megoldás forrása:                
+            Látható, hogy alapból a leforduló C programok 1 szálon futnak. Amikor végtelen ciklust indítok, azonnal gőzerővel elkezdte darálni az ütemező által épp szabadnak ítélt magot. Az OpenMP könyvtár segítségével megoldható az is viszont, hogy több szálat terheljen a vezérlés. Ekkor egyszerre minden elérhető magot terhel a ciklus. A ciklus extrém processzorterhelése megelőzhető a polling lelassításával, pl. a példakódban használt sleep(1) segítségével. Ez az adott szálat kisorolja az átadott időtartamig.
         </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>            
-    </section>        
-        
+    </section>
     <section>
         <title>Lefagyott, nem fagyott, akkor most mi van?</title>
         <para>
             Mutasd meg, hogy nem lehet olyan programot írni, amely bármely más programról eldönti, hogy le fog-e fagyni vagy sem!
-        </para>
-        <para>
-            Megoldás videó:
         </para>
         <para>
             Megoldás forrása:  tegyük fel, hogy akkora haxorok vagyunk, hogy meg tudjuk írni a <function>Lefagy</function>
@@ -49,14 +42,14 @@
 	{
 		Lefagy(Q)
 	}
-}]]></programlisting>            
+}]]></programlisting>
         <para>
             A program futtatása, például akár az előző <filename>v.c</filename> ilyen pszeudókódjára:
             <screen><![CDATA[T100(t.c.pseudo)
-true]]></screen>            
+true]]></screen>
             akár önmagára
             <screen><![CDATA[T100(T100)
-false]]></screen>  
+false]]></screen>
             ezt a kimenetet adja.          
         </para>
         <para>
@@ -87,11 +80,10 @@ false]]></screen>
 		Lefagy2(Q)
 	}
 
-}]]></programlisting>            
-        <programlisting><![CDATA[]]></programlisting>            
+}]]></programlisting>
         <para>
             Mit for kiírni erre a <computeroutput>T1000(T1000)</computeroutput> futtatásra?
-                                
+
             <itemizedlist>
                 <listitem>
                     <para>Ha T1000 lefagyó, akkor nem fog lefagyni, kiírja, hogy true</para>                        
@@ -100,14 +92,15 @@ false]]></screen>
                     <para>Ha T1000 nem fagyó, akkor pedig le fog fagyni...</para>                        
                 </listitem>
             </itemizedlist>
+
             akkor most hogy fog működni? Sehogy, mert ilyen <function>Lefagy</function>
             függvényt, azaz a T100 program nem is létezik.                
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Ez a pszeudokód Turing megállási problémáját mutatja be. Ez példázza hogy egy Turing gép sosem lesz képes megmondani, hogy egy másik Turing gép megáll-e vagy végtelen ciklusba kerül, mert logikai ellentmondásba kerülne menet közben. Ha egy ilyen gépnek átadjuk a saját kódját, azt fogja mondani hogy nem áll meg, de ez nem lehetséges, hisz azzal hogy ezt megmondta, megállt.
         </para>
-    </section>        
-                
+    </section>
+
     <section>
         <title>Változók értékének felcserélése</title>
         <para>
@@ -118,13 +111,12 @@ false]]></screen>
             Megoldás videó: <link xlink:href="https://bhaxor.blog.hu/2018/08/28/10_begin_goto_20_avagy_elindulunk">https://bhaxor.blog.hu/2018/08/28/10_begin_goto_20_avagy_elindulunk</link>
         </para>
         <para>
-            Megoldás forrása:  
+            Megoldás forrása: /bhax_sources/fejezet2/valtozocsere.c
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            A cserélendő változók ábrázolása lehetővé teszi ezt a fajta cserét. Az aritmetikai rész nem igényel további dokumentációt, sima matek, ld. kommentek a kódban.
         </para>
-    </section>                     
-
+    </section>
     <section>
         <title>Labdapattogás</title>
         <para>
@@ -136,30 +128,31 @@ false]]></screen>
             Megoldás videó: <link xlink:href="https://bhaxor.blog.hu/2018/08/28/labdapattogas">https://bhaxor.blog.hu/2018/08/28/labdapattogas</link>
         </para>
         <para>
-            Megoldás forrása:  
+            Megoldás forrása: /bhax_sources/fejezet2/labda_iffel.c; /bhax_sources/fejezet2/labda_ifnelkul.c
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Az eredeti forrás egyszerű: boundary checkinget hajtunk végre minden draw után. Az ncurses segítségével felvesszük a konzolablak teljes méretét, lehelyezünk egy O-t egy koordinátára, várunk, mozgatjuk az O-t, boundary checkelünk ifekkel, majd minden megy előről. A feltételek megnézik, hogy balról, jobbról, felülről és alulról elérte-e már a "labda" az ablak szélét, és ez alapján negálja a mozgatásra használt "vektorok" irányát.
         </para>
-    </section>                     
-
+        <para>
+            Az if mentes módszer a C-ben való osztás tulajdonságát abuse-olja. Megnézi hogy milyen távolságra van a két széltől egy adott irányban (x vagy y), de mivel ez egészt ad vissza, így mindig 0 vagy 1 lesz az eredmény. A két részt összeadva (a labda előtti rész, és a labda utáni rész) megmutatja, hogy ha elértük az egyik szélt. 1 értéket vesz fel, ha szélen vagyunk, 0-t ha bárhol máshol. -1-et ezzel hatványra emelve megkapjuk, hogy mennyivel szorozzuk meg a mozgatóvektort. -1 a nulladikon az 1, így a mozgatóvektor 1-gyel lesz szorozva, azaz nem változik. -1 az elsőn viszont már -1, így a mozgatóvektort ezzel szorozva a negáltjára fordul, a labda mozgásának az iránya megfordul. Így már működik.
+        </para>
+    </section>
     <section>
         <title>Szóhossz és a Linus Torvalds féle BogoMIPS</title>
         <para>
             Írj egy programot, ami megnézi, hogy hány bites a szó a gépeden, azaz mekkora az <type>int</type> mérete.
-            Használd ugyanazt a while ciklus fejet, amit Linus Torvalds a BogoMIPS rutinjában! 
+            Használd ugyanazt a while ciklus fejet, amit Linus Torvalds a BogoMIPS rutinjában!
         </para>
         <para>
-            Megoldás videó: <link xlink:href=""></link>
+            Megoldás forrása: /bhax_sources/fejezet2/szohossz.c
         </para>
         <para>
-            Megoldás forrása: <link xlink:href=""></link>
+            Ahogy a kód alapján is látható, lesz két változónk: egy hossz nevű, amiben számoljuk a biteket, és egy pivot nevű, amiben egy ún. jelzőbitet helyezünk el, a legalacsonyabb helyiértéken (hex: 0x1 == dec: 1). Az utótesztelős (do-while) ciklus először leszámolja a pivot elemet, ami létezik, tehát 1 bitet már biztos tárol az int - majd loopba lép.
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat... 
+            A ciklusfej a BogoMIPS-ben hivatkozott részen alapul. A trükk a <![CDATA[<<=]]> operátorban rejlik. Amit csinál, igazából nem is olyan bonyolult: balra bitshifteli a változó tartalmát, jelen esetben 1-gyel (ld. a kód). Így a jelzőbit fokozatosan "le fog csúszni" balra. Eközben egyre nagyobb értéket vesz fel a módosított változó - de mivel C-ben a 0 hamist, bármi más pedig igazt jelöl, a ciklus tovább robog. Amint "leesik" a jelzőbit a bal oldalon viszont, a változó értéke 0 lesz, és a ciklus terminál. Így le tudjuk számolni a szóhosszt, hisz az int 1 szó hosszú.
         </para>
-    </section>                     
-
+    </section>
     <section>
         <title>Helló, Google!</title>
         <para>
@@ -167,16 +160,12 @@ false]]></screen>
             értékét!
         </para>
         <para>
-            Megoldás videó: <link xlink:href=""></link>
+            Megoldás forrása: /bhax_sources/fejezet2/pagerank.c
         </para>
         <para>
-            Megoldás forrása: <link xlink:href=""></link>
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            A PageRank algoritmus 1:1 implementálása a diasori példa alapján. 4 oldal egymásra mutató linkjeinek száma alapján (kifelé mutató linkek száma, saját magára mutató linkek száma) alapján súly lesz az adott oldalhoz linkelve, mátrixműveletek segítségével.
         </para>
     </section>
-
     <section xml:id="Brun">
         <title>100 éves a Brun tétel</title>
         <para>
@@ -188,8 +177,51 @@ false]]></screen>
         <para>
             Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/blob/master/attention_raising/Primek_R">https://gitlab.com/nbatfai/bhax/blob/master/attention_raising/Primek_R</link>
         </para>
+        <para>Először lássuk az előre elkészített kódot!</para>
+        <programlisting language="R"><![CDATA[library(matlab)
+
+stp <- function(x){
+
+    primes = primes(x)
+    diff = primes[2:length(primes)]-primes[1:length(primes)-1]
+    idx = which(diff==2)
+    t1primes = primes[idx]
+    t2primes = primes[idx]+2
+    rt1plust2 = 1/t1primes+1/t2primes
+    return(sum(rt1plust2))
+}
+
+x=seq(13, 1000000, by=10000)
+y=sapply(x, FUN = stp)
+plot(x,y,type="b")
+]]></programlisting>
+        <para>
+            Vegyük sorra mi mit csinál! Először is létrehozunk egy stp nevű függvényt, mely egy tetszőleges x számig kiszámolja a Brun-konstans értékét. Ez a következőképp történik:
+
+            <itemizedlist>
+                <listitem>
+                    <para>eltárolja a prímeket x-ig</para>
+                </listitem>
+                <listitem>
+                    <para>minden prímet kivon a rákövetkezőből, és ezeket a különbségeket eltárolja</para>
+                </listitem>
+                <listitem>
+                    <para>minden olyan esetnek ahol a különbség 2 volt, kimenti az indexét</para>
+                </listitem>
+                <listitem>
+                    <para>ezzel előállítja a t1primes és t2primes vektort, amiben az ikerprímeket helyezi el, az idx indexű prímek és az idx indexű prímek + 2 (ami mindig egy másik prím lesz) segítségével</para>
+                </listitem>
+                <listitem>
+                    <para>képez egy vektort felhasználva az előbb említett 2 vektort, azokra reciprok és páronkénti összeadást alkalmazva</para>
+                </listitem>
+                <listitem>
+                    <para>visszaadja az összegét ennek a vektornak</para>
+                </listitem>
+            </itemizedlist>
+
+            Ezt követően arbitrary steppinggel megáll pár x értéknél, és kiszámolja a Brun-konstans értékét addig a pontig, majd plotolja. Látható hogy az értékek valóban konstans értékhez tartanak.
+        </para>
     </section>
-    
     <section xml:id="bhax-textbook-feladatok-turing.MontyHall">
         <title>A Monty Hall probléma</title>
         <para>
@@ -202,8 +234,13 @@ false]]></screen>
             Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/MontyHall_R">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/MontyHall_R</link>
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            A Monty Hall probléma rendkívül híres, a valószínűségszámítás sajátosságait jól demózó probléma. Az alapprobléma a következő. van 3 ajtó, az egyik mögött pedig a főnyeremény (a többi mögött meg egy-egy kecske). Elsőkörben választunk egy ajtót, ami mögött valószínűnek érezzük a főnyereményt. Ekkor a helyes döntés esélye 1/3. Ezután a játékvezető kinyit egy (1) ajtót. Amennyiben nem a főnyeremény volt mögötte, dönthetünk: a megmaradt két ajtó közül maradunk annál, amit az első körben kiválasztottunk, vagy cserélünk a másikra.
+        </para>
+        <para>
+            A helyes döntés mindig cserélni; ekkor kétszer nagyobb esélyünk lesz a nyerésre. A gondolatmenet a következő: mikor először választunk ajtót, 1/3 esély van arra, hogy mögötte lesz a főnyeremény, 2/3 arra hogy a másik két ajtó közül valamelyik mögött. Amikor a játékvezető kinyit azok közül egyet, és nem a főnyeremény volt mögötte, az esélye 0%-ra nő, míg a másiké 100%-ra, azaz a két ajtóra eső valószínűség (2/3) 100%-át (egészét) birtokolja az az ajtó. Így tehát annak a másik nyitott ajtónak 2/3 eséllyel lehet a főnyeremény mögötte, míg az általunk választottnak továbbra is 1/3-dal, tehát érdemesebb arra váltani.
+        </para>
+        <para>
+            Statisztikai szimulációval ezt könnyen be lehet látni, ld. a hivatkozott kód.
         </para>
     </section>
-
-</chapter>                
+</chapter>
