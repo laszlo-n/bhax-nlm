@@ -8,26 +8,86 @@
     <section>
         <title>A Mandelbrot halmaz</title>
         <para>
-                
+            Megoldás forrása: <filename>/book_sources/fejezet5/mandelbrot.cpp</filename>
         </para>
         <para>
-            Megoldás videó:
+            Van egy x ∈ [-2; 2] y ∈ [-2i; 2i] komplex síkunk. Erre mi "ráterítünk" egy tetszőleges felbontású (pl. 800x800-as) rácsot (a kimeneti kép pixeleit). Minden egyes pixelhez tartozó pontban kiértékelünk egy speciális függvényt iteratívan (ld. később), majd ha egy bizonyos, általunk paraméterezhető határszámig iterálva a fv. érték még mindig része a Mandelbrot-halmaznak, a pixelt beszínezzük. Opcionálisan, ha az iterálás végetér a köszöbszám elérése előtt (a függvényérték elkezd minden határon túl nőni, ld. később), felhasználhatjuk azt az információt a pixel színének árnyalására.
+
+A kiértékelendő függvény és iterációja a következő képen működik:
+
+c egy konstans komplex szám (a pixelhez tartozó koordináta), z a fv. érték, ahol z0 mindig 0 (az első kiértékelendő z mindig a 0).
+
+Ezutóbbi információt elfelejtve, az általános képlet a következő:
+
+fc(z1) = z02 + c
+
+fc(z2) = z12 + c
+
+…
+
+fc(zn+1) = zn2 + c, egészen n &lt; küszöbérték-ig, valamint amíg el tudjuk hinni, hogy adott c esetén véges értékek közt marad z (|z| ≤ 2).
+
+Mivel viszont az utolsó mondatnak nagyon is tudatában vagyunk, látható, hogy igazából az iteráció a következőképpen fog kinézni:
+
+fc(z1) = 02 + c = c
+
+fc(z2) = c2 + c
+
+fc(z3) = (c2 + c)2 + c
+
+fc(z4) = ((c2 + c)2 + c)2 + c
+
+… stb.
+
+A dolgot megbonyolíthatja, hogy a c konstans komplex szám. Nézzük meg először tehát ismétlésként, hogy miként működnek a komplex számokkal való műveletek!
+        
+        Komplex számok: szorzása
+
+Minden komplex szám egy valós és egy imaginárius komponensből tevődik össze (pl. a + bi, ahol a és b valós számok, i az ún. imaginárius állandó, amire igaz az, hogy i2 = -1; a a valós rész, bi a képzetes/imaginárius rész).
+
+Ennek ismeretében próbáljunk meg először négyzetre emelni, hiszen igazából úgyis arra lesz szükségünk, és a szorzást is bemutatja.
+
+(a + bi) * (a + bi) = a2 + a * bi + a * bi + b2i2 = a2 + 2 * a * bi - b2 (mivel i2 ugye -1)
+
+Átrendezve: a2 - b2 + 2abi, ahol a2 - b2 felfogható egy új komplex szám valós részének, 2abi pedig a képzetesnek. Jelölve őket x-szel és y-nal:
+
+= x + yi (ahol x = a2 - b2 és y = 2ab)
+
+Komplex számok: összeadása
+
+Komplex számok összeadása komponensenként történik, tekinthetünk rá úgy is, mint vektorok összeadására.
+
+Példa:
+
+(a + bi) + (c + di) = (a + b) + (c + d)i
+
+Ezek ismeretében most már elméletileg mindent tudnunk kell egy Mandelbrot-halmazt ábrázoló diagram elkészítéséhez.
         </para>
         <para>
-            Megoldás forrása:                
+            Szükséges hozzá a libpng++ package:
+
+sudo apt-get install libpng++-dev
+
+Fordítás menete:
+
+g++ -fopenmp -c mandelbrot.cpp "libpng-config --cflags"
+g++ -fopenmp -lpthread -o mandelbrot mandelbrot.o "libpng-config --ldflags"
+
+Futtatás:
+
+./mandelbrot "kimenet.png"
+
+A fentiekben elmagyarázott algoritmus 1:1 megvalósítása, apróbb extra infókért ld. kommentek (saját mind). Virtuálisan bármekkora felbontást támogat, csak a memória szab neki határt (na meg a számítási időigény :p).
         </para>
     </section>        
         
     <section>
         <title>A Mandelbrot halmaz a <filename>std::complex</filename> osztállyal</title>
         <para>
-                
+            Megoldás forrása: <filename>/book_sources/fejezet5/mandelbrot.cpp</filename>             
         </para>
         <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
+            A kód minimális változtatásokat igényelt csak. A néhány módosított sorban látható, hogy egyszerűbben kifejezhető lett a gondolatmenet, és az ujZ változóra sem volt szükség így, hisz nincs komponensenkénti data hazard.
         </para>
     </section>        
                 
@@ -39,24 +99,16 @@
             Megoldás videó: <link xlink:href="https://youtu.be/IJMbgRzY76E">https://youtu.be/IJMbgRzY76E</link>
         </para>
         <para>
-            Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/Biomorf">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/Biomorf</link>
+            Megoldás forrása: <filename>/book_sources/fejezet5/biomorf.cpp</filename>     
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>                        
-    </section>                     
+           A biomorf fraktálok biológiai entitások formáihoz hasonlítanak (pl. sejtek), ezért különlegesek. Alapvetően elhibázott Julia-halmazról van szó minden esetben, ezért kevés módosítás kell.
 
-    <section>
-        <title>A Mandelbrot halmaz CUDA megvalósítása</title>
-        <para>
-        </para>
-        <para>
-            Megoldás videó: 
-        </para>
-        <para>
-            Megoldás forrása:  
-        </para>
-    </section>                     
+A Julia-halmazoknál a c rögzítve van, és a z jár be több értéket. Ha több Julia-halmazt kíván az ember animáltan megjeleníteni, felfogható egy kétváltozós függvényként is, ahol a c az adott pixel ami felett pl. az egérmutató van, z pedig a viewport összes pixelén csörtet végig; így megkapjuk az egérmutató által kijelölt komplex számhoz tartozó Julia-halmazt.
+
+A Julia-halmazok és a Mandelbrot-halmazok közötti egyik legjelentősebb kapcsolat az az, hogy ha egy Mandelbrot-halmazban lévő komplex számra értékeljük ki az ahhoz tartozó Julia-halmazt, akkor egy "pacába" tartozó alakzatot kapunk, ha pedig azon kívül, külön "szigetekbe" csoportosuló alakzatokat kapunk.
+        </para>                        
+    </section>                                     
 
     <section>
         <title>Mandelbrot nagyító és utazó C++ nyelven</title>
@@ -66,20 +118,69 @@
         </para>
             
         <para>
-            Megoldás forrása:  
+            Megoldás forrása: sourceforge repo
         </para>
 
         <para>
-            Megoldás videó: 
-        </para>
-        <para>
-            Megoldás forrása:  
+            Nem sikerült feléleszteni windows-on a qt-t.
         </para>
     </section>                     
                                                                                                                                                                             
     <section>
         <title>Mandelbrot nagyító és utazó Java nyelven</title>
         <para>
+            forrás: <link xlink:href="https://forum.processing.org/two/discussion/comment/103600/#Comment_103600">https://forum.processing.org/two/discussion/comment/103600/#Comment_103600</link>
+        </para>
+        <para>
+            Processing szükséges hozzá.
+
+            <programlisting language="java"><![CDATA[boolean flag;
+int count=0;
+int acc=3;
+double space=0.90;
+int stop=0;
+ 
+float colorinc = 0;
+ 
+float rotangle;
+float posy;
+void setup() {
+  size(600, 600, P3D);
+ 
+  // fullScreen(P3D);
+  stop=(int)(width*2/space/space-width*2);
+  noStroke();
+}
+void draw() {
+  background(255);
+ 
+  acc = int(map(mouseX, 0, width, -200, 200));
+ 
+  flag=true;
+  count+=acc;
+  if (count < 0) count += stop;
+ 
+  drawcircle(width/2, height/2, width*2+count%stop, 0.1, space, colorinc);
+}
+ 
+ 
+void drawcircle(float x, float y, float size, float umbral, double space, float _c) {
+ 
+  color color1 = color(map(size, 0, width, 200, 0), 150, 50);
+  color color2 = color(50, 150, map(size, 0, width, 0, 200));
+ 
+  fill(flag?  color1:color2);
+  ellipse(x, y, size, size);
+ 
+ 
+  if (size > umbral) {
+    _c+=0.1;
+    posy+=0.001;
+    flag=!flag;
+    size*= space;
+    drawcircle(x, y, size, umbral, space, _c);
+  }
+}]]></programlisting>
         </para>
     </section>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
