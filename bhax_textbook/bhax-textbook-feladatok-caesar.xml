@@ -11,14 +11,83 @@
            
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: refaktorált sourceforge-os:
+            <programlisting language="c"><![CDATA[#include <stdio.h>
+#include <stdlib.h>
+
+int main ()
+{
+    int nr = 5;
+    double **tm;
+
+    if ((tm = (double **) malloc(nr * sizeof (double *))) == NULL)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < nr; ++i)
+    {
+        if ((tm[i] = (double *) malloc((i + 1) * sizeof (double))) == NULL)
+        {
+            return -1;
+        }
+
+    }
+
+    for (int i = 0; i < nr; ++i)
+        for (int j = 0; j < i + 1; ++j)
+            tm[i][j] = i * (i + 1) / 2 + j;
+
+    for (int i = 0; i < nr; ++i)
+    {
+        for (int j = 0; j < i + 1; ++j)
+            printf ("%f, ", tm[i][j]);
+        printf ("\n");
+    }
+
+    tm[3][0] = 42.0;
+    (*(tm + 3))[1] = 43.0;	// mi van, ha itt hiányzik a külső ()
+    *(tm[3] + 2) = 44.0;
+    *(*(tm + 3) + 3) = 45.0;
+
+    for (int i = 0; i < nr; ++i)
+    {
+        for (int j = 0; j < i + 1; ++j)
+            printf ("%f, ", tm[i][j]);
+        printf ("\n");
+    }
+
+    for (int i = 0; i < nr; ++i)
+        free (tm[i]);
+
+    free (tm);
+
+    return 0;
+}]]></programlisting>
         </para>
         <para>
-            Megoldás forrása:                
+            Mit csinál a kód, mi a lényeg? A lényeg a pointerek és a tömbök hasonlósága a C nyelvben. A tömbelemekre hivatkozás operátora [] használható pointer dereferenciára is.
+        </para>   
+        <para>         
+            Az elején lefoglalunk egy 5 double * méretű területet és a tm-hez rendeljük. Ez kb. ugyanaz, mintha lenne egy double *tm[5]-ünk. Ezt követően minden ilyen elemhez rendelünk egy egyre növekvő méretű double tömböt. Így lesz belőle háromszögmátrix.
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>            
+            Az ezt követő dupla ciklus bejárja a háromszögmátrix elemeit, és értéket rendel hozzájuk, majd egy másik ugyanilyen cikluspáros kiírja ezeket az értékeket.
+        </para>
+        <para>
+            Ezután megkíséreljük felüldefiniálni a háromszögmátrixban tárolt értékeket. Mennyünk végig soronként!
+            <programlisting language="c"><![CDATA[tm[3][0] = 42.0;]]></programlisting>
+            A 4. sor 1. elemét 42-re állítja.
+            <programlisting language="c"><![CDATA[(*(tm + 3))[1] = 43.0;]]></programlisting>
+            A 4. sor 2. elemét 43-ra állítja. A (*(tm + 3)) dereferrálja a base + 3. elemét a tm-nek, azaz a 4. sort. Innentől pedig megy tovább a téma ugyanúgy. Ha nem lenne zárójel akkor a 4. oszlop lenne kiválasztva, és mivel az már nem tömb, annak a [1] eleme nem létezik, és elszállna.
+            <programlisting language="c"><![CDATA[*(tm[3] + 2) = 44.0;]]></programlisting>
+            Először kiválasztja a 4. sort, majd 2 offsettel a 3. oszlopot derefferálja. Magyarul tehát a 4. sor 3. oszlopát állítja 44-re.
+            <programlisting language="c"><![CDATA[*(*(tm + 3) + 3) = 45.0;]]></programlisting>
+            Itt már tisztán pointer aritmetikával dereferráljuk a 4. sor 4. oszlopának értékét és 45-re állítjuk.
+        </para>
+        <para>
+            Ezt követően végigmegy megint két ciklussal a program a háromszögmátrixon, kiírja minden elemét. Majd egy hasonló ciklus felszabadítja az összes benne lévő elemet, majd cikluson kívül kézzel mi magunk felszabadítjuk a tm változót is.
+        </para>
     </section>        
     <section>
         <title>C EXOR titkosító</title>
@@ -26,14 +95,53 @@
             Írj egy EXOR titkosítót C-ben!
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: sourceforge-os, refaktorálva: <programlisting language="c"><![CDATA[#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+#define MAX_KULCS 100
+#define BUFFER_MERET 256
+
+int main(int argc, char **argv)
+{
+    char kulcs[MAX_KULCS];
+    char buffer[BUFFER_MERET];
+
+    int kulcs_index = 0;
+    int olvasott_bajtok = 0;
+
+    int kulcs_meret = strlen(argv[1]);
+    strncpy(kulcs, argv[1], MAX_KULCS);
+
+    while((olvasott_bajtok = read(0, (void *)buffer, BUFFER_MERET)))
+    {
+        for (int i = 0; i < olvasott_bajtok; ++i)
+        {
+            buffer[i] = buffer[i] ^ kulcs[kulcs_index];
+            kulcs_index = (kulcs_index + 1) % kulcs_meret;
+        }
+        write(1, buffer, olvasott_bajtok);
+    }
+}]]></programlisting>
         </para>
         <para>
-            Megoldás forrása:                
+            Majd folytassuk a titkosítandó szöveggel és a kulccsal! (56789012)
+            <screen>A processz és a szál olyan absztrakciók, amelyeket egy program teremt meg számunkra, az ope
+rációs rendszer, azaz a kernel. A konkrétabb tárgyalás kedvéért gondoljunk most egy saját C
+ programunkra! Ha papíron, vagy a monitoron egy szerkesztőben nézegetjük a forrását, akkor 
+valami élettelen dolgot vizsgálunk, amelyben látunk lexikális és szintaktikai egységeket, u
+tasításokat, blokkokat, függvényeket; nem túl érdekes. Ha lefordítjuk és futtatjuk, akkor v
+iszont már valami élő dolgot vizsgálhatunk, ez a processz, amely valahol ott van a tárban. 
+Ennek a tárterületnek az elején a program környezete, a parancssor argumentumai, a lokális 
+változóterülete és a paraméterátadás bonyolítására szolgáló veremterüle található, amelyet 
+a dinamikusan foglalható területe, a halom követ. Majd jön az inicializált globális és stat
+ikus változóit hordozó adat szegmens és az iniciálatlan BSS. Végül jön a kódszegmense, majd
+ a konstansai. Ennek a tárterületnek a kernelben is van egy vetülete, ez a
+PCB.hogy</screen>
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>            
+            A működése vihar egyszerű. A kulcsot elmenti, majd a bemenet karakterein egyenként végighaladva és a kulcs betűin egyenként körbemenve mindegyik betű párt össze xor-ozza (egy betű a bemenetről, egy betű a kulcsból), és visszaírja a kimenetre.
+        </para>
     </section>        
     <section>
         <title>Java EXOR titkosító</title>
@@ -44,7 +152,36 @@
             Megoldás videó:
         </para>
         <para>
-            Megoldás forrása:                
+            forrás: <link xlink:href="https://www.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/ch01.html#exor_titkosito">https://www.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/ch01.html#exor_titkosito</link>
+            <programlisting language="java"><![CDATA[public class ExorTitkosító {
+    public ExorTitkosító(String kulcsSzöveg,
+                        java.io.InputStream bejövőCsatorna,
+                        java.io.OutputStream kimenőCsatorna)
+                        throws java.io.IOException {
+        
+        byte [] kulcs = kulcsSzöveg.getBytes();
+        byte [] buffer = new byte[256];
+        int kulcsIndex = 0;
+        int olvasottBájtok = 0;
+
+        while ((olvasottBájtok = bejövőCsatorna.read(buffer)) != -1) {
+            for (int i = 0; i < olvasottBájtok; ++i) {
+                buffer[i] = (byte)(buffer[i] ^ kulcs[kulcsIndex]);
+                kulcsIndex = (kulcsIndex+1) % kulcs.length;
+            }
+            
+            kimenőCsatorna.write(buffer, 0, olvasottBájtok);   
+        }
+    }
+    
+    public static void main(String[] args) {
+        try {
+            new ExorTitkosító(args[0], System.in, System.out);
+        } catch(java.io.IOException e) {
+            e.printStackTrace();   
+        }   
+    }
+}]]></programlisting>
         </para>
         <para>
             Tanulságok, tapasztalatok, magyarázat...
@@ -56,13 +193,109 @@
             Írj egy olyan C programot, amely megtöri az első feladatban előállított titkos szövegeket!
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: a tankönyvtáras könyv, refaktolálva:
+            <programlisting language="c"><![CDATA[#define MAX_TITKOS 4096
+#define OLVASAS_BUFFER 256
+#define KULCS_MERET 8
+#define _GNU_SOURCE
+
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+double atlagos_szohossz(const char *titkos, int titkos_meret)
+{
+    int sz = 0;
+    for (int i = 0; i < titkos_meret; ++i)
+        if (titkos[i] == ' ')
+            ++sz;
+
+    return (double) titkos_meret / sz;
+}
+
+int tiszta_lehet(const char *titkos, int titkos_meret)
+{
+    // a tiszta szoveg valszeg tartalmazza a gyakori magyar szavakat
+    // illetve az átlagos szóhossz vizsgálatával csökkentjük a
+    // potenciális töréseket
+
+    double szohossz = atlagos_szohossz(titkos, titkos_meret);
+
+    return szohossz > 6.0 && szohossz < 9.0
+           && strcasestr (titkos, "hogy") && strcasestr (titkos, "nem")
+           && strcasestr (titkos, "az") && strcasestr (titkos, "ha");
+
+}
+
+void exor(const char kulcs[], int kulcs_meret, char titkos[], int titkos_meret)
+{
+    int kulcs_index = 0;
+
+    for (int i = 0; i < titkos_meret; ++i)
+    {
+        titkos[i] = titkos[i] ^ kulcs[kulcs_index];
+        kulcs_index = (kulcs_index + 1) % kulcs_meret;
+    }
+
+}
+
+int exor_tores(const char kulcs[], int kulcs_meret, char titkos[], int titkos_meret)
+{
+    exor(kulcs, kulcs_meret, titkos, titkos_meret);
+
+    return tiszta_lehet(titkos, titkos_meret);
+}
+
+int main(void)
+{
+    char kulcs[KULCS_MERET];
+    char titkos[MAX_TITKOS];
+    char *p = titkos;
+    int olvasott_bajtok;
+
+    // titkos fajt berantasa
+    while ((olvasott_bajtok =
+                read (0, (void *) p,
+                      (p - titkos + OLVASAS_BUFFER <
+                       MAX_TITKOS) ? OLVASAS_BUFFER : titkos + MAX_TITKOS - p)))
+        p += olvasott_bajtok;
+
+    // maradek hely nullazasa a titkos bufferben
+    for (int i = 0; i < MAX_TITKOS - (p - titkos); ++i)
+        titkos[p - titkos + i] = '\0';
+
+    // osszes kulcs eloallitasa, karakterenként végigpörög
+    for (int ii = '0'; ii <= '9'; ++ii)
+    for (int ji = '0'; ji <= '9'; ++ji)
+    for (int ki = '0'; ki <= '9'; ++ki)
+    for (int li = '0'; li <= '9'; ++li)
+    for (int mi = '0'; mi <= '9'; ++mi)
+    for (int ni = '0'; ni <= '9'; ++ni)
+    for (int oi = '0'; oi <= '9'; ++oi)
+    for (int pi = '0'; pi <= '9'; ++pi)
+    {
+        kulcs[0] = ii;
+        kulcs[1] = ji;
+        kulcs[2] = ki;
+        kulcs[3] = li;
+        kulcs[4] = mi;
+        kulcs[5] = ni;
+        kulcs[6] = oi;
+        kulcs[7] = pi;
+
+        if (exor_tores(kulcs, KULCS_MERET, titkos, p - titkos))
+            printf("Kulcs: [%c%c%c%c%c%c%c%c]\nTiszta szoveg: [%s]\n",
+                    ii, ji, ki, li, mi, ni, oi, pi, titkos);
+
+        // ujra EXOR-ozunk, igy nem kell egy masodik buffer
+        exor(kulcs, KULCS_MERET, titkos, p - titkos);
+    }
+
+    return 0;
+}]]></programlisting>
         </para>
         <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            -O3 kapcsolóval a tankönyvi forrás szerint 5 perc alatt végez, bár ez az egyszálas implementáció. A működése egyszerű. Megpróbál minden 8 jegyű számkombinációt, újraexorozza a titkos szöveget vele, majd ha az átlagos szóhossz 6 és 9 karakter között van, valamint a supposed cleartexxt tartalmazza a hogy, az, ha és nem szavakat, megjelöli lehetséges kulcsként az adott kombinációt. Ezeket és a tisztaszöveget kiíratja stdout-ra.
         </para>            
     </section>        
     <section>
@@ -77,22 +310,16 @@
             Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/NN_R">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/NN_R</link>               
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Gyakorlatilag ezeknek a kapuknak az "analóg"-szerű megvalósítása. Egy neurális hálóba behuzalozásra kerül az egyes művelet, és ezeket tetszőleges a1 és a2 próbaadatokon végrehajtja.
         </para>            
     </section>        
     <section>
         <title>Hiba-visszaterjesztéses perceptron</title>
         <para>
-            C++
-        </para>
-        <para>
-            Megoldás videó:
-        </para>
-        <para>
             Megoldás forrása:                
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Megnéztem a forrást, de nem sikerült felélesztenem. Még majd foglalkozok vele, a perceptronokat már nagyjából értem mik.
         </para>            
     </section>        
         
