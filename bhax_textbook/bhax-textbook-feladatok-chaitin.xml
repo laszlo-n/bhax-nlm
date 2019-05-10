@@ -8,89 +8,28 @@
     <section>
         <title>Iteratív és rekurzív faktoriális Lisp-ben</title>
         <para>
-                
-        </para>
-        <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-    </section>        
-        
-    <section>
-        <title>Weizenbaum Eliza programja</title>
-        <para>
-            Éleszd fel Weizenbaum Eliza programját!
-        </para>
-        <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-    </section>        
+             Lisp egy funkcionális programozási nyelv, jellegzetessége a zárójelek hadserege amit minden egyes kód felvonultat. Már nem igazán használják. A Scheme egy Lisp-dialektus, a mostani példában azt használjuk.
 
-    <section>
-        <title>Gimp Scheme Script-fu: króm effekt</title>
-        <para>
-            Írj olyan script-fu kiterjesztést a GIMP programhoz, amely megvalósítja a króm effektet egy 
-            bemenő szövegre!
-        </para>
-        <para>
-            Megoldás videó: <link xlink:href="https://youtu.be/OKdAkI_c7Sc">https://youtu.be/OKdAkI_c7Sc</link>      
-        </para>
-        <para>
-            Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Chrome">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Chrome</link>               
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>    
-    </section>        
+             <programlisting language="lisp"><![CDATA[(define (faktorialis n)
+    (define (iter product counter)
+        (if (> counter n)
+            product
+            (iter (* counter product) (+ counter 1))
+        ))
+    (iter 1 1))
+(display (faktorialis 3))]]></programlisting>
+Először is iterálnunk kellene tudni. Mivel a Scheme-ben nincsenek szokványos vezérlési szerkezetek, így az iterációt is saját kézzel kell, ez látható a második sorban. Az `iter` vár két változót argumentumaként, első a ciklusváltozó, második a számláló. Az eljáráson belül teszteljük a szabad változó értékét (n, előltesztelős ciklust írtunk, ha meghaladja értéke a counter értékét akkor visszaadja az addig kiszámolt faktoriális értéket, ellenben folytatja annak számítását.
 
-    <section>
-        <title>Gimp Scheme Script-fu: név mandala</title>
-        <para>
-            Írj olyan script-fu kiterjesztést a GIMP programhoz, amely név-mandalát készít a
-            bemenő szövegből!               
-        </para>
-        <para>
-            Megoldás videó: <link xlink:href="https://bhaxor.blog.hu/2019/01/10/a_gimp_lisp_hackelese_a_scheme_programozasi_nyelv">https://bhaxor.blog.hu/2019/01/10/a_gimp_lisp_hackelese_a_scheme_programozasi_nyelv</link>      
-        </para>
-        <para>
-            Megoldás forrása: <link xlink:href="https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Mandala">https://gitlab.com/nbatfai/bhax/tree/master/attention_raising/GIMP_Lisp/Mandala</link>               
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>            
-    </section>        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-    <section>
-        <title>Lambda</title>
-        <para>
-            Hasonlítsd össze a következő programokat!
-        </para>
-        <para>
-            Megoldás videó: <link xlink:href=""></link>      
-        </para>
-        <para>
-            Megoldás forrása: <link xlink:href=""></link>               
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>            
-    </section>        
+Hiába tűnik azonban iterációs módszernek, a háttérben ez továbbra is rekurzívan fog futni. Ennek persze megvannak a saját teljesítménybeli következményei, de ez most minket hidegen hagy. Viszont ha már amúgy is rekurzívan fog futni, érdemes inkább alapból rekurzív megközelítést használni, nem?
 
-    <section>
-        <title>Omega</title>
-        <para>
+Rekurzívan:
+
+<programlisting language="lisp"><![CDATA[(define (faktorialis n)
+(if (= n 1)
+1
+(* n (faktorialis (- n 1) ))
+))
+(display (faktorialis 3))]]></programlisting>
         </para>
-        <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-    </section>        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+    </section>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 </chapter>                
