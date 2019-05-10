@@ -18,7 +18,9 @@
             Megoldás forrása: <link xlink:href=""></link>               
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Amennyire kivettem a feladatból és a videóból, itt igazából ismét az OO szerkezeten van hangsúly, nem konkrétan a működésen. A hangyák mind külön osztálypéldányok, és úgy hatnak egymásra. Maga a feladat valamennyire hasonlít az életjátékra (ld. 7.2), de nem ugyanazt a működést valósítja meg.
+
+Az UML diagram (vagy legalábbis valami ahhoz nagyon hasonló) a könyvben linkelt forrásban is megtalálható. A legfontosabb megfigyelés talán itt, hogy minden Ant külön szálon, AntThread-en fut.
         </para>            
     </section>        
     <section>
@@ -31,10 +33,18 @@
             Megoldás videó: 
         </para>
         <para>
-            Megoldás forrása: <link xlink:href=""></link>               
+            Megoldás forrása: <link xlink:href="https://processing.org/examples/gameoflife.html">https://processing.org/examples/gameoflife.html</link>               
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Ez már sokkal közelebb áll hozzám. Conway életjátékának a szabályainak az ismertetésétől most eltekintenék, akit érdekel, itt elolvashatja: <link xlink:href="https://hu.wikipedia.org/wiki/Életjáték">https://hu.wikipedia.org/wiki/Életjáték</link>.
+
+Maga a játéknak a célja filozófiai vonatkozású. Azt példázza, hogy néhány, egyszerű szabály segítségével nagyon komplex működések és folyamatok alakulhatnak ki. Erre egy példa a feladat utasításában megemlített "sikló-kilövő" is, amely mozgásban is látható a hivatkozott Wikipédia-oldalon.
+        
+        A kód működtetéséhez a Processing nevű eszközre lesz szükség.
+
+A működése nem túl bonyolult, pláne nem valakinek aki már dolgozott Processinggel (aki még nem, annak ajánlom!). Először a setup() metódusban felvesszük a cellarácsot, és véletlenszerűen kitöltjük cellákkal. Ezt követően a draw() felelős minden újonnan megrajzolt képkockért, onnan kerül meghívásra az iteration() metódus, mely a játéklogika alkalmazásáért felelős.
+
+A kód tartalmaz némi interaktív részt is, nevezetesen lehetővé teszi a szimuláció megállítását, és a cellák kézzel kitöltését is, egyedi formákat lehetővé téve.
         </para>            
     </section>        
     <section>
