@@ -11,32 +11,28 @@
             Állapotátmenet gráfjával megadva írd meg ezt a gépet!
         </para>
         <para>
-            Megoldás videó:
-        </para>
-        <para>
             Megoldás forrása:                
         </para>
         <para>
             Tanulságok, tapasztalatok, magyarázat...
         </para>
-    </section>        
-        
+    </section>
     <section>
         <title>Az a<superscript>n</superscript>b<superscript>n</superscript>c<superscript>n</superscript> nyelv nem környezetfüggetlen</title>
         <para>
             Mutass be legalább két környezetfüggő generatív grammatikát, amely ezt a nyelvet generálja!
         </para>
-        <para>
-            Megoldás videó:
-        </para>
-        <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
-    </section>        
-                
+        <programlisting><![CDATA[1.		S	→	a	B	C
+2.		S	→	a	S	B	C
+3.	C	B	→	C	Z
+4.	C	Z	→	W	Z
+5.	W	Z	→	W	C
+6.	W	C	→	B	C
+7.	a	B	→	a	b
+8.	b	B	→	b	b	
+9.	b	C	→	b	c
+10.	c	C	→	c	c]]></programlisting>
+    </section>
     <section>
         <title>Hivatkozási nyelv</title>
         <para>
@@ -45,16 +41,72 @@
             Majd mutass be olyan kódcsipeteket, amelyek adott szabvánnyal nem fordulnak (például C89), mással (például C99) igen.
         </para>
         <para>
-            Megoldás videó: 
+            A C nyelvű utasítások BNF (Backus-Naur-forma) szintaxissal leírva, forrása a Western Michigan University honlapja (<link xlink:href="https://bit.ly/2u2urLs">https://bit.ly/2u2urLs</link>):
         </para>
-        <para>
-            Megoldás forrása:  
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
-    </section>                     
+        <programlisting><![CDATA[<statement> ::= <labeled-statement>
+              | <expression-statement>
+              | <compound-statement>
+              | <selection-statement>
+              | <iteration-statement>
+              | <jump-statement>
 
+<labeled-statement> ::= <identifier> : <statement>
+                      | case <constant-expression> : <statement>
+                      | default : <statement>
+
+<expression-statement> ::= {<expression>}? ;
+
+<selection-statement> ::= if ( <expression> ) <statement>
+                        | if ( <expression> ) <statement> else <statement>
+                        | switch ( <expression> ) <statement>
+
+<iteration-statement> ::= while ( <expression> ) <statement>
+                        | do <statement> while ( <expression> ) ;
+                        | for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement>
+
+<jump-statement> ::= goto <identifier> ;
+                   | continue ;
+                   | break ;
+                   | return {<expression>}? ;]]></programlisting>
+        <para>A Backus-Naur-forma igazából a formális nyelveknél a környezetfüggetlen nyelvek leírására használt jelölés gépi feldolgozásra kidolgozott változata, működésben teljesen megegyezik azzal:</para>
+        <screen><![CDATA[A -> AA | b]]></screen>
+        <para>
+            Ez egy általános és elterjedt jelölés, mely a generatív grammatikák leírására használatos; <command>A</command> egy nemterminális szimbólum, <command>b</command> egy terminális szimbólum, <command>-></command> a leképezés operátora, <command>|</command> a logikai xor művelete operátora. Ez a grammatika például egy <command>A</command>-t vagy egy <command>AA</command>-ra, vagy egy <command>b</command>-re cserél, és addig nem áll meg, amíg minden <command>A</command>-ból <command>b</command> nem lesz (terminál). Magyarul tetszőleges számú <command>b</command> generálására használatos.
+        </para>
+        <para>
+            Lássuk akkor a C89 vs. C99 példát!
+        </para>
+        <programlisting language="c"><![CDATA[int main(void)
+{
+    /* nem lehet scope-ra vonatkozó lokális változót létrehozni */
+
+    int i;
+    for (i = 0; i < 10; i++);
+    return 0;
+}]]></programlisting>
+        <para>
+            Ez a kód, egy, a C89 szabványnak megfelelő code snippet. Két jellegzetességet is érdemes megfigyelni:
+
+            <itemizedlist>
+                <listitem>
+                    <para>// stílusú kommentek nem megengedettek, csak és kizárólag /* */ használata lehetséges</para>
+                </listitem>
+                <listitem>
+                    <para>nem lehet a ciklus scope-jának lifetime-jára vonatkozóan változót deklarálni, kötelező előtte</para>
+                </listitem>
+            </itemizedlist>
+        </para>
+        <programlisting language="c"><![CDATA[int main(void)
+{
+    // itt már lehet
+
+    for (int i = 0; i < 10; i++);
+    return 0;
+}]]></programlisting>
+        <para>
+            C99-ben ezek egyike sem okoz már gondot.
+        </para>
+    </section>
     <section>
         <title>Saját lexikális elemző</title>
         <para>
@@ -63,33 +115,158 @@
             a feladat lényege, hogy lexert használjunk, azaz óriások vállán álljunk és ne kispályázzunk!
         </para>
         <para>
-            Megoldás videó: 
+            Megoldás forrása: a BHAX "Így neveld a programozód!" c. streamje:
+            <programlisting language="c"><![CDATA[%{
+#include <stdio.h>
+int realnumbers = 0;
+%}
+digit	[0-9]
+%%
+{digit}*(\.{digit}+)? 	{++realnumbers; 
+    printf("[realnum=%s %f]", yytext, atof(yytext));}
+%%
+int
+main ()
+{
+ yylex ();
+ printf("The number of real numbers is %d\n", realnumbers);
+ return 0;
+}]]></programlisting>
         </para>
         <para>
-            Megoldás forrása:  
+            A lexer megírásához a *nix rendszereken elérhető <command>lex</command> (aka. <command>flex</command>) tool-t használjuk. Ez az eszköz, amint az feljebb látható, egy saját szintaxist alkalmazó fájl alapján C forráskódot állít elő, mely garantáltan biztonságosan fogja feldolgozni az átadot bemenetet.
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Minden <command>lex</command> forráskód 3 részből áll, melyeket <command>%%</command> választ el. Az első rész "vezérléssel kapcsolatos" definíciókat tartalmaz, a második magukat a matchelendő tokeneket és a match során végrehajtandó utasításokat, a harmadik pedig C kódot tartalmaz, ami az előállított C forrásban 1:1 megjelenik.
         </para>
-    </section>                     
-
+        <para>
+            Az első szekcióban láthatjuk azonban, hogy <command>%{</command> és <command>%}</command> szimbólumok közt C kód szerepel. Ebben a szekcióban az ilyen szimbólumokkal körülhatárolt rész szintén C kód beillesztésére használatos, 1:1 másolásra kerül a kimeneti C forrásba. 
+        </para>
+        <para>
+            Amint látható, amellett hogy behúzzuk a <command>stdio.h</command> headert, létrehozunk egy <command>realnumbers</command> változót is, melyben a megtalált valós számok darabszámát fogjuk eltárolni. Továbbá láthatjuk, hogy a C nyelvű részen kívül definiálásra kerül egy <command>digit</command> nevű placeholder, mely a <command>[0-9]</command> regex tokent fogja jelképezni.
+        </para>
+        <para>
+            A második szakasz <command>regex { &lt;C utasítások&gt; }</command> formátumban tokeneket definiál amikre matchelünk, majd utasításokat amiket a megtalálásukkor végre kell hajtani. Itt látható, hogy mintailleszkedés esetén növeljük a <command>realnumbers</command> változó értékét, illetve kiírjuk a szövegrészletet ami matchelt (ld. a <command>yytext</command> fenntartott változó), valamint magát a számot (az <command>atof()</command>, azaz alpha-to-float függvény segítségével).
+        </para>
+        <para>
+            A harmadik szakasz tiszta C kódot tartalmaz, ami az Áttekintésben leírtak mentén 1:1 belekerül a kimeneti C forrásba. Érdemes megfigyelni a <command>yylex()</command> hívást, az indítja el és hajtja végre az elemzést.
+        </para>
+        <para>
+            A <command>lex</command> forrást a <command>lex sample.lex</command> paranccsal tudjuk C kóddá alakítani (ahol a <command>sample.lex</command> a lex forrásfájl neve/elérési útja). Ezt követően létrejön egy <command>lex.yy.c</command> nevű C forrásfájl jön létre, amit innentől kezdve hagyományosan (pl. <command>gcc lex.yy.c -o sample_lexer</command>) lehet fordítani. A szöveget <command>STDIN</command> streamen keresztül kapja, a kimenetet a <command>STDOUT</command> streamre teszi.
+        </para>
+    </section>
     <section>
         <title>l33t.l</title>
         <para>
             Lexelj össze egy l33t ciphert!
         </para>
         <para>
-            Megoldás videó: 
+            Megoldás forrása: hasonlóan az előző kódhoz, ez is a BHAX "Így neveld a programozód!" c. streamjéből származik:
+            <programlisting language="c"><![CDATA[%{
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <time.h>
+  #include <ctype.h>
+
+  #define L337SIZE (sizeof l337d1c7 / sizeof (struct cipher))
+    
+  struct cipher {
+    char c;
+    char *leet[4];
+  } l337d1c7 [] = {
+
+  {'a', {"4", "4", "@", "/-\\"}},
+  {'b', {"b", "8", "|3", "|}"}},
+  {'c', {"c", "(", "<", "{"}},
+  {'d', {"d", "|)", "|]", "|}"}},
+  {'e', {"3", "3", "3", "3"}},
+  {'f', {"f", "|=", "ph", "|#"}},
+  {'g', {"g", "6", "[", "[+"}},
+  {'h', {"h", "4", "|-|", "[-]"}},
+  {'i', {"1", "1", "|", "!"}},
+  {'j', {"j", "7", "_|", "_/"}},
+  {'k', {"k", "|<", "1<", "|{"}},
+  {'l', {"l", "1", "|", "|_"}},
+  {'m', {"m", "44", "(V)", "|\\/|"}},
+  {'n', {"n", "|\\|", "/\\/", "/V"}},
+  {'o', {"0", "0", "()", "[]"}},
+  {'p', {"p", "/o", "|D", "|o"}},
+  {'q', {"q", "9", "O_", "(,)"}},
+  {'r', {"r", "12", "12", "|2"}},
+  {'s', {"s", "5", "$", "$"}},
+  {'t', {"t", "7", "7", "'|'"}},
+  {'u', {"u", "|_|", "(_)", "[_]"}},
+  {'v', {"v", "\\/", "\\/", "\\/"}},
+  {'w', {"w", "VV", "\\/\\/", "(/\\)"}},
+  {'x', {"x", "%", ")(", ")("}},
+  {'y', {"y", "", "", ""}},
+  {'z', {"z", "2", "7_", ">_"}},
+  
+  {'0', {"D", "0", "D", "0"}},
+  {'1', {"I", "I", "L", "L"}},
+  {'2', {"Z", "Z", "Z", "e"}},
+  {'3', {"E", "E", "E", "E"}},
+  {'4', {"h", "h", "A", "A"}},
+  {'5', {"S", "S", "S", "S"}},
+  {'6', {"b", "b", "G", "G"}},
+  {'7', {"T", "T", "j", "j"}},
+  {'8', {"X", "X", "X", "X"}},
+  {'9', {"g", "g", "j", "j"}}
+};  
+%}
+%%
+.	{
+	  
+	  int found = 0;
+	  for(int i=0; i<L337SIZE; ++i)
+	  {
+	  
+	    if(l337d1c7[i].c == tolower(*yytext))
+	    {
+	    
+	      int r = 1+(int) (100.0*rand()/(RAND_MAX+1.0));
+	    
+          if(r<91)
+	        printf("%s", l337d1c7[i].leet[0]);
+          else if(r<95)
+	        printf("%s", l337d1c7[i].leet[1]);
+	      else if(r<98)
+	        printf("%s", l337d1c7[i].leet[2]);
+	      else 
+	        printf("%s", l337d1c7[i].leet[3]);
+
+	      found = 1;
+	      break;
+	    }
+	    
+	  }
+	  
+	  if(!found)
+	     printf("%c", *yytext);	  
+	  
+	}
+%%
+int 
+main()
+{
+  srand(time(NULL)+getpid());
+  yylex();
+  return 0;
+}]]></programlisting>
         </para>
         <para>
-            Megoldás forrása:  
+            Az alapelv hasonló az előzőhöz, a kivitelezés azonban eltér. A kimeneti program egy tetszőleges bemeneti szövegből leetspeak stílusú szöveget készít (<link xlink:href="https://simple.wikipedia.org/wiki/Leet">https://simple.wikipedia.org/wiki/Leet</link>).
         </para>
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+            Az importok mellett definiáljuk az ún. <command>leetsize</command> (stilizáltan: <command>L337SIZE</command>) változót mely a lefedett karakterek számát jelöli, illetve egy struktúrát <command>leetdict</command> néven (stilizáltan: <command>l337d1c7</command>), mely minden egyes karakteréhez 4 lehetséges csere-opciót társít (tárol).
         </para>
-    </section>                     
-
-
+        <para>
+            Más taktikát alkalmazunk mint az előzőnél: itt minden egyes karakterre matchelünk (<command>.</command>). Amint matcheltünk egy karakterre, elkezdünk végigiterálni a <command>leetdict</command>-en, keresve az adott karakter után, hogy le van-e fedve. Ha megtaláljuk, véletlenszerűen kiírjuk helyetete a hozzátartozó karakternégyes egyik tagját, majd break. Ha nem kiírjuk az eredeti karaktert.
+        </para>
+        <para>
+            A harmadik szakaszban az előző feladathoz hasonlóan rendkívül triviális dolgok történnek, mindössze annyiban több az előzőnél, hogy az elején rögzítjük a random függvényhez a seedet az <command>srand(time(NULL) + getpid())</command> hívással.
+        </para>
+    </section>
     <section>
         <title>A források olvasása</title>
         <para>
@@ -114,47 +291,60 @@
             <listitem>                                    
                 <programlisting><![CDATA[if(signal(SIGINT, SIG_IGN)!=SIG_IGN)
     signal(SIGINT, jelkezelo);]]></programlisting>
+                <para>Meglehetősen érdekesen viselkedik. Mindig sikeres a feltétel alapból, amikor nem próbálunk szignált átadni. Amint mégis megpróbálunk, sikeresen el is utasítja, de egy idő után már nem írja ki a jelkezelo()-ben megadott stringet. Ezt nem vizsgáltam tovább.</para>
             </listitem>
             <listitem>                                    
                 <programlisting><![CDATA[for(i=0; i<5; ++i)]]></programlisting>            
             </listitem>
             <listitem>                                    
-
-                <programlisting><![CDATA[for(i=0; i<5; i++)]]></programlisting>            
+                <programlisting><![CDATA[for(i=0; i<5; i++)]]></programlisting>
+                <para>A két ciklus működésre megegyezik.</para>
             </listitem>
             <listitem>                                    
-
-                <programlisting><![CDATA[for(i=0; i<5; tomb[i] = i++)]]></programlisting>            
+                <programlisting><![CDATA[for(i=0; i<5; tomb[i] = i++)]]></programlisting>
+                <para>A tomb tömb i-edik eleme i-vel lesz egyenlő, majd az i értéke megnövelődik.</para>
             </listitem>
             <listitem>                                    
-
-                <programlisting><![CDATA[for(i=0; i<n && (*d++ = *s++); ++i)]]></programlisting>            
+                <programlisting><![CDATA[for(i=0; i<n && (*d++ = *s++); ++i)]]></programlisting>
+                <para>Meglepő módon lefordul! A működése számomra rejtély viszont, hisz az assigmentnek nem hiszem hogy kellene lennie logikai értékének.</para>
+            </listitem>
+            <listitem>
+                <programlisting><![CDATA[printf("%d %d", f(a, ++a), f(++a, a));]]></programlisting>
+                <para>Meghívja az f() fv-t, a-val és a+1-gyel, valamint a változók megcserélésével is, és kiírja az eredményt.</para>       
             </listitem>
             <listitem>                                    
-
-                <programlisting><![CDATA[printf("%d %d", f(a, ++a), f(++a, a));]]></programlisting>            
+                <programlisting><![CDATA[printf("%d %d", f(a), a);]]></programlisting>   
+                <para>Kiírja az f(a) visszatérési értékét és az a értékét.</para>         
             </listitem>
             <listitem>                                    
-
-                <programlisting><![CDATA[printf("%d %d", f(a), a);]]></programlisting>            
-            </listitem>
-            <listitem>                                    
-
-                <programlisting><![CDATA[printf("%d %d", f(&a), a);]]></programlisting>            
+                <programlisting><![CDATA[printf("%d %d", f(&a), a);]]></programlisting>
+                <para>Az f() referenciát kap, ha úgy van megírva működik szépen és kiírásra kerül a visszatérési érték.</para>
             </listitem>
         </orderedlist>
         <para>
-            Megoldás forrása:  
-        </para>
+            Ez a feladat a szignálok kezeléséről szól. Lássuk a kiinduló példakódot:
 
+            <programlisting language="c"><![CDATA[#include <stdio.h>
+#include <signal.h>
+
+void jelkezelo()
+{
+	printf("ugh\n");
+}
+
+int main(void)
+{
+	for(;;)
+	{
+		if(signal(SIGINT, jelkezelo)==SIG_IGN)
+			signal(SIGINT, SIG_IGN);
+	}
+	return 0;
+}]]></programlisting>
+        </para>
         <para>
-            Megoldás videó: 
+            Láthatjuk, hogy a <command>main()</command>-ben egy végtelen ciklus pörög. A benne lévő feltétel megnézi, hogy a <command>SIGINT</command>-ben lévő szignál állapota mi, miután meghívódott a <command>jelkezelo()</command>. Amennyiben <command>SIG_IGN</command> (azaz szignál ignorálása) a visszaadott érték, ismét beállítja hogy ignorálva legyen. Ebből az szűrhető le, hogy alapból ignorálásra kerülnek a szignálok, mi tudjuk befolyásolni őket, hogy ne legyenek (ld. <command>man 2 signal</command>).
         </para>
-
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
-
     </section>                     
 
     <section>
@@ -177,9 +367,21 @@ $(\exists y \forall x (y<x) \supset \neg (x \text{ prím}))$
         <para>
             Megoldás videó: <link xlink:href="https://youtu.be/ZexiPy3ZxsA">https://youtu.be/ZexiPy3ZxsA</link>, <link xlink:href="https://youtu.be/AJSXOQFF_wk">https://youtu.be/AJSXOQFF_wk</link>
         </para>
-
         <para>
-            Tanulságok, tapasztalatok, magyarázat...
+        <itemizedlist>
+                <listitem>
+                    <para>tetszőleges x számhoz létezik olyan y hogy nagyobb nála és prím (~ a prímek végtelenségig nőnek)</para>
+                </listitem>
+                <listitem>
+                    <para>nem értettem mi az az SS</para>
+                </listitem>
+                <listitem>
+                    <para>minden x prímnél van egy nagyobb y szám</para>
+                </listitem>
+                <listitem>
+                    <para>minden nem prímnél van kisebb y</para>
+                </listitem>
+        </itemizedlist>
         </para>
     </section>                                                                                                                                                                            
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
@@ -259,18 +461,23 @@ $(\exists y \forall x (y<x) \supset \neg (x \text{ prím}))$
                 <programlisting><![CDATA[int (*(*z) (int)) (int, int);]]></programlisting>            
             </listitem>            
         </itemizedlist>       
-
-
         <para>
-            Megoldás videó: 
-        </para>
-        <para>
-            Megoldás forrása:  
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat...
-        </para>
-    </section>                     
+            <programlisting language="c"><![CDATA[int main(void)
+{
+  int i; // egy egész
+  int *mutat_i = &i; // egészre mutató mutató
+  // referenciát passz
+  int egesztomb[10]; // egész tömb
+  // referenciát passz
+  int *mutatotomb[10]; // egészre mutató mutatók tömbje
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+  int* pelda1(int &ref)
+  {
+    return ref;
+  }
+
+  
+}]]></programlisting>
+        </para>
+    </section>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 </chapter>                
