@@ -14,14 +14,49 @@
             nincs eltéve kiszámolt szám.
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: diasor              
         </para>
         <para>
-            Megoldás forrása:                
-        </para>
-        <para>
-            Tanulságok, tapasztalatok, magyarázat... térj ki arra is, hogy a JDK forrásaiban a Sun programozói
-            pont úgy csinálták meg ahogyan te is, azaz az OO nemhogy nem nehéz, hanem éppen természetes neked!
+            <programlisting language="java"><![CDATA[public class PolárGenerátor { // osztály
+    // fieldek
+    boolean nincsTárolt = true;
+    double tárolt;
+
+    public PolárGenerátor() { // konstruktor
+        nincsTárolt = true; // újra beállítja, mert ez az eredeti src és kész
+    }
+
+    public double Következő() {
+        if (nincsTárolt) {
+            double u1, u2, v1, v2, w;
+            do {
+                u1 = Math.Random();
+                u2 = Math.Random();
+                v1 = 2 * u1 - 1;
+                v2 = 2 * u2 - 1;
+                w = v1 * v1 + v2 * v2;                
+            } while (w > 1);
+            double r = Math.sqrt((-2 * Math.log(w)) / w);
+            tárolt = r * v2;
+            nincsTárolt = !nincsTárolt;
+            return r * v1;
+        } else {
+            nincsTárolt = !nincsTárolt;
+            return tárolt;
+        }
+    }
+
+    public static void main(String[] args) {
+        PolárGenerátor g = new PolárGenerátor();
+        for (int i = 0; i < 10; i++) {
+            System.out.println(g.következő());
+        }
+    }
+}]]></programlisting>
+
+Ahogy a feladat utasítása is tisztázta, itt nem a matek a lényeg. Van egy osztályunk, benne vannak attribútumaink és metódusaink. Az első metódus amit láthatunk a konstruktor, alatta meg van egy ilyen Következő() nevű függvény.
+
+Ennek nagyon örülünk, mert szépen egységbe van zárva. A példányosított objektumnak mindig lesz egy állapota amit a fieldjei határoznak meg, és meg lehet rajta hívni a metódusokat, amik azt mutálják. Ez szerencsés, mert elfedi az implementációt. Látható ahogy a main()-ben példányosítunk egy ilyen objektumot, és kitolunk pár polárkoordinátát (?) a stdout-ra.
         </para>                
     </section>        
 
@@ -31,12 +66,33 @@
             Valósítsd meg C-ben az LZW algoritmus fa-építését!
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/ziv/z.c">https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/ziv/z.c</link> + jó erős refaktor, ld. <filename>/book_sources/binfa.c</filename>
         </para>
         <para>
-            Megoldás forrása:                
+            A forrás elég kaotikus volt, számos hibával, szóval refaktoráltam csöppet - ami meglepő módon legalább segített felfogni mi is történik, és rávett, hogy beletegyek némi valódi effortot.
+
+Márpedig ami lényegében történik, az nem túl bonyolult. Hozzávalók: egy szabványos fa-struktúra, némi boilerplate kód, és egy csipetnyi ciklusmag, ami a bemeneten csörtet végig karakterenként. Amennyiben az éppen beolvasott bájt értéke a [0-255] tartomány alsó felébe esik, 0-t tárolunk el a bal oldali levélelemében az aktuális faelemnek ahol épp vagyunk, ha pedig a felső felébe esik, 1-et tárolunk el a jobb oldali levélelemében az aktuális faelemnek, ahol épp vagyunk.
+
+Ezen annyit csavarunk csak, hogy ha két egymást követő olyan bájt van, amelyik ugyanabba a fél-intervallumba tartozik, akkor ahelyett hogy felülírnánk az adott levélelemet ahova a bájt tartozna, készítünk oda egy új levélelemet, továbbágaztatva a fát. Ezzel belekódoljuk a fába az adott "mintájú" bájtsorozatokat.
+
+A fa minden éle egy olyan mintázatot jelöl, ami megtalálható az eredeti bemenetben. Nyilván mivel mi az alapján helyezzük el ezeket a levélelemeket, hogy a [0-255] tartomány alsó vagy felső felébe esnek, ezzel nem megyünk sokra (az adat elvész). Ha azonban nem bináris fát, hanem többelemű fát használunk, ez a faszerkezetes algoritmus tömörítésre használható.
+
+A kiíratás inorder sorrendben történik (eredetileg right-first stílusban, én left-first-re írtam át), a memória-felszabadítás pedig postorder sorrendben.
+
+A kiíratás kódja elég triviális, magától értetődő. Sima rekurzió.
+
+<programlisting language="c"><![CDATA[void printInorder(BINFA_PTR elem)
+{
+    if (elem != NULL)
+    {
+        printInorder(elem -> bal_nulla);
+        printf("%d", elem -> ertek);
+        printInorder(elem -> jobb_egy);
+    }
+}]]></programlisting>
+Aki az elemek sorrendjére kíváncsi az ilyen bejárásoknál, látogasson el erre az oldalra: <link xlink:href="https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/">https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/</link>.
         </para>
-    </section>        
+    </section>
         
     <section>
         <title>Fabejárás</title>
@@ -44,10 +100,35 @@
             Járd be az előző (inorder bejárású) fát pre- és posztorder is!
         </para>
         <para>
-            Megoldás videó:
+            forrás: az előző kód, a következő kiegészítésekkel, ld alább         
         </para>
         <para>
-            Megoldás forrása:                
+            <programlisting language="c"><![CDATA[void printPreorder(BINFA_PTR elem)
+{
+    if (elem != NULL)
+    {
+        printf("%d", elem -> ertek);
+        printPreorder(elem -> bal_nulla);
+        printPreorder(elem -> jobb_egy);
+    }
+}
+
+void printPostorder(BINFA_PTR elem)
+{
+    if (elem != NULL)
+    {
+        printPostorder(elem -> bal_nulla);
+        printPostorder(elem -> jobb_egy);
+        printf("%d", elem -> ertek);
+    }
+}]]></programlisting>
+Az elemek sorrendje, példával, ld. az előbb linkelt oldalon. Érdemes megfigyelni, hogy az elnevezés rendkívül bőbeszédű (nekem még nem említették soha, most figyeltem fel rá)! Ugye, mindig az -order kap egy előtagot. Ami befolyásolja hogy pre-, in- vagy post- előtagot kap, az az, hogy mikor kerül a gyökér kiíratásra!
+
+- ha előbb a gyökér, majd a két levélelem kerül meglátogatásra, preorder
+- ha levél-gyökér-levél, azaz szép sorban ahogy egymás után jönnek a sorrend, inorder
+- ha előbb a levelek, majd végül a gyökér kerül meglátogatásra, postorder
+
+Ezen kívül más extra ehhez a feladathoz nem nagyon kellett, max. a végén még a main()-ben meghívni a printPreorder() és a printPostorder() metódusokat, egy próba erejéig.
         </para>
     </section>        
                         
@@ -58,10 +139,21 @@
             osztálya. A gyökér csomópont legyen kompozícióban a fával!
         </para>
         <para>
-            Megoldás videó:
+            Megoldás forrása: az előző kód, saját átalakításokkal, valamint némi inspirációkkal a "hivatalos" forrásból (<link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/binfa/binfa.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/binfa/binfa.cpp</link>), ld. <filename>binfa.cpp</filename>
         </para>
         <para>
-            Megoldás forrása:                
+            Mivel az utasítás nem volt túlságosan tiszta, a következő feltételezést tettem:
+
+a legyen kompozícióban azt jelenti, hogy része legyen a gyökérelem mutatója a Tree osztálynak
+Egyébként kb. tök ugyanaz történik, mint a C változat esetében, csak itt struct-ok helyett class-okra támaszkodunk, és szépen eljátszogatunk a láthatósággal és az enkapszulációval.
+
+Van egy Tree objektumunk, benne egy root elemmel, ami a gyökérelemre mutat (így a root a Tree-vel "kompozícióban" van). Emellett a Tree-ből még nyilvános az addElement() és printInorder() metódusok is, előbbi az LZW-logikát tartalmazza, utóbbi pedig ahogy a nevéből is látszik, egy inorder printoutot.
+
+A privát mezőkben található egy position pointer, ami a fában mindig arra az adott elemre mutat, ahol épp dolgozunk - illetve egy resetPosition() helper metódus is, ami elvégzi a position gyökérelemre állítását, ha szükéges.
+
+Itt található még a nested Node class is, amiben megvannak az adott levélelemek szükséges fieldjei (érték, bal elemre mutató mutató, jobb elemre mutató mutató), és az ezeket elfedő getterek és setterek.
+
+Természetesen mind a Tree mind a beágyazott Node class rendelkezik a szükséges destruktorokkal és konstruktorokkal is.
         </para>
     </section>        
                 
@@ -72,10 +164,17 @@
             fával!
         </para>
         <para>
-            Megoldás videó: 
+            forrás: Az előző kód, saját átalakításokkal. <filename>/book_sources/fejezet6/binfa_mutato.cpp</filename>
         </para>
         <para>
-            Megoldás forrása:  
+            Mivel az utasítás nem volt túlságosan tiszta, a következő feltételezést tettem:
+
+a legyen aggregációban azt jelenti, hogy a gyökérelem mutatóját a Tree egy példánya csak megkapja
+Vegyük sorra a változtatásokat! A legapróbb és legtriviálisabb az osztály példányosításánál található: a konstruktor megkap egy Node típusú objektumpéldány-mutatót, amit majd a gyökérelem mutatójaként tárol el a Tree fa nevű példányának root elemében.
+
+Ahhoz, hogy ezt megtehessük, publikussá kell tenni a Node osztályt előbb. Ehhez az osztályt picit átmozgattam a kódban. További változtatás, hogy a konstruktor ugye át lett alakítva, hogy Node-pointert fogadjon és eltároljon, valamint hogy a destruktor mostantól a default destructor, mivel a gyökérobjektum külön létezik az osztálypéldánytól, így megtartja saját alfáját (ami ezesetben ugye az egész fa) bármi is történjék - ahhoz, hogy magát a fát töröljük ki, a gyökérobjektum életciklusát kell ezután majd kézzel menedzselnünk (delete xy;).
+
+Nagyon fontos például, hogy a jelenlegi példában a gyökérobjektumot csak a fa objektumon keresztül tudjuk elérni, mivel helyben példányosítottunk. Ez azzal jár, hogy ha a fa objektumot felszabadítjuk, a mögötte lévő bináris fa továbbra is jelen marad, viszont mi elvesztjük a mutatónkat rá, így fel sem fogjuk már tudni szabadítani többet (memory leak).
         </para>
     </section>                     
 
@@ -86,10 +185,9 @@
             értékadásra alapozva!
         </para>
         <para>
-            Megoldás videó: 
-        </para>
-        <para>
-            Megoldás forrása:  
+            Próbáltam megoldani amennyire csak lehet, de nem igazán jártam sikerrel. Errefelé nézelődtem legfőképp: https://docs.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=vs-2019 és https://stackoverflow.com/a/3109981.
+
+Elméletileg a lényeg az lenne, hogy "ellopjuk" a másik Tree objektumtól a gyökérmutatót, ezáltal kivéve őt és az alatta lévő fát a másik objektum életciklusából.
         </para>
     </section>                     
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
