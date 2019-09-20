@@ -7,7 +7,11 @@
     </info>
     <section>
 		<title>C++ vs. Java</title>
-		<para></para>
+		<para>Bár mind a C++ és a Java OO szemléletet előtérbe helyező nyelvek, megvalósításukban jelentős eltéréseket mutatnak. Ezek a különbségek más területen való használatra ösztönzik az adott nyelvek fejlesztőit, de ez nem azt jelenti, hogy nem helyettesíthetnék egymást sikererrel. Ehhez azonban alaposan ismerni kell mindkét nyelvi stacket, különben könnyen levonhatunk hamis következtetéseket.</para>
+		<para>Vegyük először a legnyilvánvalóbbat, a menedzseltséget. Minden Java kód a JVM (java virtual machine) köztes nyelvére fordul, nem pedig natív kódra. Futtatás során a JVM beindul, és elkezdi futtatni ezt a köztes nyelven írt kódot. Bár úgy tűnhetne, hogy ez jelentősen lelassítja a működést, ez az esetek többségében nem igaz.</para>
+		<para>A memóriakezelésben is eltér a két nyelv. Javában kizárólag referenciák vannak, mindent kivesz a kezünkből a JVM és a GC. A JVM gráfot épít az objektumreferenciáinkból, és bizonyos időközönként a GC végigjárja ezt a gráfot, nem referrált objektumok után kutatva. A memóriát így a GC tartja karban helyettünk, kizárva a memory leakek lehetőségét.</para>
+		<para>A java nem támogat többszörös öröklést. Helyette interfészeket kell használni.</para>
+		
     </section>
 	<section>
 		<title>Python alapok</title>
