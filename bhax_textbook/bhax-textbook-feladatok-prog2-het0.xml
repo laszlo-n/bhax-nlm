@@ -1,18 +1,41 @@
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
     <info>
-    	<title>Hell�, Berners-Lee!</title>
+    	<title>Helló, Berners-Lee!</title>
         <keywordset>
             <keyword/>
         </keywordset>
     </info>
     <section>
-		<title>C++ vs. Java pt. 1</title>
+		<title>C++ vs. Java</title>
+		<para></para>
     </section>
 	<section>
-		<title>C++ vs. Java pt. 2</title>
-    </section>
-    <section>
 		<title>Python alapok</title>
-        <para>A Python egy rendk�v�l sz�lesk�r�en haszn�lt, gyors prototipiz�l�st lehet�v� t�v� szkriptnyelv. �ltal�nos v�leked�s, hogy a tanul�si g�rb�je viszonylag alacsony, az el��ll� k�d t�m�r �s j�l olvashat�. A gyors fejleszt�st �s tesztel�st el�seg�ti, hogy a nyelv alapb�l interpret�lt, �gy minden v�ltoztat�s kv�zi azonnal leellen�rizhet�.</para>
+        <para>A Python egy rendkívül széleskörűen használt, gyors prototipizálást lehetővé tevő szkriptnyelv. Általános vélekedés, hogy a tanulási görbéje viszonylag alacsonyan van, az előálló kód pedig tömör és jól olvasható. A gyors fejlesztést és tesztelést elősegíti, hogy a nyelv alapból interpretált, így minden változtatás kvázi azonnal leellenőrizhető / kipróbálható.</para>
+        <para>A nyelv maga számos apróbb ponton eltér a C/C++ stílusú nyelvektől. Gyengén típusos nyelv, a típusok közt automatikusan konvertál (duck typing). A scope-olás szintén eltér, a Python ugyanis whitespace-érzékeny, behúzások jelölik az egy scope-ba tartozó statementeket. A statementeket nem zárja pontosvessző, a statement-végek automatikusan detektáltak a tokenizáció során. Ha egy statement több soros, backtick használható több sorba tördelésre, mint más nyelvekben.</para>
+        <para>Az adattípusok listája limitált, az említett duck typingnak hála. Elkülönülnek a számszerű objektumok, a karakterek, a boolean értékek, a None, és a szekvenciák (stringek, tuple-ök, listák, dict-ek). A számok magukban foglalják az előjeles és előjelmentes egészeket, a törteket, a komplex számokat. A None a null megfelelője. A szekvenciákhoz tartozik kb. 10 egységesen használható metódus, valamint mindegyik fajtához elérhetőek továbbiak is.</para>
+        <para>A stringek szekvenciaként vannak kezelve, ez talán emlékeztethet minket a C-ben lévő karaktertömbökre. Literálokat aposztrófok vagy idézőjelek közt lehet megadni. Köszönhetően annak, hogy az általános szekvencia-műveletek alkalmazhatóak rájuk, a stringmanipuláció általánosságban egyszerű Pythonban.</para>
+        <para>A tuple-ök elem n-esek. Több féle objektumot is össze lehet fogni velük, hasznos mikor például egyszerre több objektumot is vissza akarunk adni egy hívás végeztével. Zárójelek közt, az objektumok és/vagy literálok vesszővel elválasztott felsorolásával lehet őket elsősorban létrehozni.</para>
+        <para>A lista akár több féle objektum rendezett szekvenciája. Elemeire indexekkel lehet hivatkozni. Ha negatív indexet használunk, akkor a szekvencia végéről szedjük az elemeket (ld. később). Tetszőlegesen bővíthető. Létrehozásuk szögletes zárójelek közti, vesszővel elválasztott objektum-referencia- vagy literálfelsorolással történik.</para>
+        <para>A dictionary-k (azaz szótárak) kulcs-érték párokból álló elemhalmazok. Ebből kifolyólag nem rendezettek, az elemeikre a kulcsokkal lehet hivatkozni. Más nyelvekben ezeket asszociatív tömbökként is szokták hívni.</para>
+        <para>Most nézzük a nyelv elemeit! A változódeklarálás egyszeren egyenlőségjellel történik. Nem szükséges típust megadni, csak nevet (van amikor ez gondot is okoz). Különböző shorthandeket is lehet használni, mint az "x=y=z=1", ahol mindhárom változó létrejön 1 értékkel. Változócserét is le lehet így rövidíteni, a "x,y = y,x" pontosan ezt fogja tenni. A deklaráláson túl a nyelv a predikátumok leírását is le tudja rövidíteni: az "a&lt;b&lt;=c==d" pl. ugyanaz mint az "a&lt;b &amp;&amp; b&lt;=c &amp;&amp; c==d". Szekvenciákból ki lehet hasítani a Matlabban ismert módokon, pl: a[5:7] az az 'a' szekvenciából kiszedi az elemeket az ötös indextől a hetesig.</para>
+        <para>Az elágazások az if, elif, else kulcsszavakkal történnek, a kulcsszavak után a szükséges predikátum kerül, majd egy kettőspont. Pl.:
+        	<programlisting language="Python">
+        		<![CDATA[
+        			if szam < 0:
+        				print 'Kisebb, mint 0.'
+        			elif szam == 0:
+        				print 'A szám egyenlő nullával.'
+        			else:
+        				print 'A szám nagyobb nullánál.'
+        		]]>
+        	</programlisting>
+        </para>
+        <para>A ciklusok hasonlóak minden más nyelvhez. A szintaxis Matlabhoz hasonlít, jellemzően az iterátoros szekvencia-bejárás a célszerű.</para>
+        <para>A függvények definiálása a "def" kulcsszóval történik. A paraméterek érték szerint adódnak át, kivéve mutable típusoknál (pl. listák, szótárak). Lehetőség van alapértelmezett érték megadására is, más nyelvekből is ismerhető módon. Bár alapból a pozíció-szerinti argumentumegyeztetés a jellemző, Pythonban lehetőség van név-szerinti argumentum egyeztetésre is, ami extra flexibilitást kölcsönöz a kódnak.</para>
+        <para>A nyelv bár nem objektum-orientáltként indult, azóta az OO paradigma teljeskörű implementációt kapott. A class osztállyal hozhatunk létre osztályokat, melyekben ugyanúgy elhelyezhetünk attribútumokat és metódusokat mint bármilyen más OO paradigmát támogató nyelvben.</para>
+        <para>Az osztályokon belül a metódusok definiálása picit eltér a globálisan használható stílustól. Kötelező, hogy az első argumentumuk a self kulcsszó legyen, mely mindig az éppen aktuális objektumpéldányra fog referrálni. Az osztályokon belül létre lehet hozni egy speciális, konstruktor szerű metódust is, ennek az "__init__" nevet kell adni. Más speciális funkciójú metódusok is léteznek, ezeket mivel a forrásanyag sem tárgyalta, most itt is eltekintek a részletezésétől.</para>
+        <para>A kivételkezelés szintén létező dolog a nyelvben, és a szokványos try/catch stílusban történik; annyi csavarral, hogy itt catch helyett "except" kulcsszót használunk. Funkcionalitásra ugyanaz, adott fajta exceptiont lehet vele elkapni.</para>
+        <para>Végezetül érdemes megemlíteni még a modulrendszert. A Python köré szervezett ecosystem modulokból épül fel; ezek behúzásával lehet extra funkcionalitást könnyen hozzáadni a kódbázisainkhoz. Hasonló más nyelvekben is megtalálható package rendszerekhez, mint C#-nál a Nuget, vagy Java esetén a Maven packagek, JS esetén az NPM modulok, stb..</para>
     </section>
 </chapter>
