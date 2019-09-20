@@ -1,6 +1,6 @@
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
     <info>
-    	<title>HellÃ³, Berners-Lee!</title>
+    	<title>Hell¢, Berners-Lee!</title>
         <keywordset>
             <keyword/>
         </keywordset>
@@ -12,6 +12,7 @@
 		<title>C++ vs. Java pt. 2</title>
     </section>
     <section>
-		<title>MobilfejlesztÃ©s</title>
+		<title>Python alapok</title>
+        <para>A Python egy rendk¡vl sz‚lesk”rûen haszn lt, gyors prototipiz l st lehet‹v‚ t‚v‹ szkriptnyelv. µltal nos v‚leked‚s, hogy a tanul si g”rb‚je viszonylag alacsony, az el‹ ll¢ k¢d t”m”r ‚s j¢l olvashat¢. A gyors fejleszt‚st ‚s tesztel‚st el‹seg¡ti, hogy a nyelv alapb¢l interpret lt, ¡gy minden v ltoztat s kv zi azonnal leellen‹rizhet‹.</para>
     </section>
 </chapter>
