@@ -80,4 +80,13 @@
     </xi:include>     
     
             
-</part>  
+</part> 
+<part>
+	<xi:include href="bhax-textbook-feladatok-prog2-het0.xml">
+        <xi:fallback>
+            <para>
+                <emphasis>XInclude: bhax-textbook-feladatok-prog2-het0.xml file not found</emphasis>
+            </para>
+        </xi:fallback>
+    </xi:include>
+</part>
