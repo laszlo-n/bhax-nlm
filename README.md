@@ -24,7 +24,7 @@ Amennyiben hibába, halott linkbe, vagy egyéb problémába ütközöl, nyiss eg
 
 ## Elég ha letöltöm a pdf-et, vagy nekem kell lefordítani? Ha az utóbbi, hogyan?
 
-Mivel nem lőttem össze a CI-t, a repóba feltolt pdf kézzel került fordításra és commitolásra, azaz előfordulhat, hogy megfeledkeztem commit után fordítani, így outdated pdf ment fel a repóba (valószínűtlen, de megeshet). Ezt könnyen ellenőrizheted a `Commits` oldalon.
+~~Mivel nem lőttem össze a CI-~~, a repóba feltolt pdf kézzel került fordításra és commitolásra, azaz előfordulhat, hogy megfeledkeztem commit után fordítani, így outdated pdf ment fel a repóba (valószínűtlen, de megeshet). Ezt könnyen ellenőrizheted a `Commits` oldalon.
 
 Amennyiben saját magadnak akarod fordítani a könyv forrását, a megfelelő dependency-k telepítése után mindössze egy `make` hívására lesz szükséged. Fontos megjegyezni, hogy a dependency-k telepítésére vonatkozó parancs, és a makefile is degradálódhat az idők folyamán, az ezekkel kapcsolatos hibákat szintén az `Issues` oldalon lehet jelezni.
 
