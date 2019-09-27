@@ -1,0 +1,7 @@
+pipelines:
+  default:
+    - step:
+        script: # Modify the commands below to build your repository.
+          - cd ./bhax_textbook
+          - apt-get update && apt-get install -y docbook docbook-xml docbook-xsl xsltproc build-essential dblatex graphviz texlive-lang-european
+          - make
