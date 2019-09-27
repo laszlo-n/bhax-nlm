@@ -4,7 +4,32 @@
         <keywordset><keyword/></keywordset>
     </info>
     <section>
-		<title>OO szemlélet</title>		
+		<title>OO szemlélet</title>
+        <para>
+            <emphasis>A feladat:</emphasis> Implementáljuk a polátranszformációs alapú randomgenerátor algoritmust Java nyelven. Vizsgáljuk meg mi a különbség a mi implementációnk és a hivatalos OpenJDK-ban lévő implementáció között objektum-orientáltság szempontból! Kiindulási alapként használható a következő diasor: <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf">https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf</link> (16-22. fólia).
+        </para>
+        <para>
+            Ahogy a mellékelt diasori segédletből is látható, viszonylag nincs bonyolult dolgunk, alapvető OO koncepciókat kell felhasználnunk csak. Először is létre kell hoznunk egy osztályt &quot;<emphasis>PolárGenerátor</emphasis>&quot; néven. Osztályok segítségével tudjuk leírni, hogyan is épül fel egy adott típusú objektum: milyen fieldjei és metódusai lesznek. A mi <emphasis>PolárGenerátor</emphasis> objektumaink márpedig viszonylag triviálisak lesznek. Lesz két fieldjük, egy logikai &quot;<emphasis>nincsTárolt</emphasis>&quot; változó annak eltárolására, hogy van-e érték a &quot;tarsolyunkban&quot;, és egy dupla-pontosságú lebegőpontos szám, a &quot;<emphasis>tárolt</emphasis>&quot;, ami ezt az értéket fogja tartalmazni; valamint lesz egy metódusuk, ami a következő értékeket fogja mindig generálni (&quot;következő()&quot;). Az osztályunknak emellett lesz egy ún. konstruktora is, ami le fog lefutni minden egyes objektumpéldány létrehozásakor.
+            <programlisting language="java"><![CDATA[
+public class PolárGenerátor {
+
+    // a két fieldünk
+    boolean nincsTárolt;
+    double tárolt;
+
+    // a konstrukor
+    public PolárGenerátor() {
+        nincsTárolt = true;
+    }
+
+    // a következő() metódus (pontosabban egyelőre csak a szignatúrája)
+    public double következő() {}
+}
+            ]]></programlisting>
+        </para>
+        <para>
+            <!--http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583-->
+        </para>
     </section>
 	<section>
 		<title>Homokozó</title>
