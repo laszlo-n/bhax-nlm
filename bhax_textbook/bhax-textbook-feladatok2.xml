@@ -1,8 +1,9 @@
-<part xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
-      xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+<part xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
 
 	<title>Második felvonás</title>
-	<partintro><para/></partintro>
+	<partintro>
+		<para/>
+	</partintro>
 
 	<xi:include href="bhax-textbook-feladatok-prog2-het0.xml">
 		<xi:fallback>
