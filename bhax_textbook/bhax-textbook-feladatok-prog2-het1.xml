@@ -1,46 +1,156 @@
 <chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
-    <info>
-    	<title>Helló, Arroway!</title>
-        <keywordset><keyword/></keywordset>
-    </info>
-    <section>
+	<info>
+		<title>Helló, Arroway!</title>
+		<keywordset><keyword/></keywordset>
+	</info>
+	<section>
 		<title>OO szemlélet</title>
-        <para>
-            <emphasis>A feladat:</emphasis> Implementáljuk a polátranszformációs alapú randomgenerátor algoritmust Java nyelven. Vizsgáljuk meg mi a különbség a mi implementációnk és a hivatalos OpenJDK-ban lévő implementáció között objektum-orientáltság szempontból! Kiindulási alapként használható a következő diasor: <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf">https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf</link> (16-22. fólia).
-        </para>
-        <para>
-            Ahogy a mellékelt diasori segédletből is látható, viszonylag nincs bonyolult dolgunk, alapvető OO koncepciókat kell felhasználnunk csak. Először is létre kell hoznunk egy osztályt &quot;<emphasis>PolárGenerátor</emphasis>&quot; néven. Osztályok segítségével tudjuk leírni, hogyan is épül fel egy adott típusú objektum: milyen fieldjei és metódusai lesznek. A mi <emphasis>PolárGenerátor</emphasis> objektumaink márpedig viszonylag triviálisak lesznek. Lesz két fieldjük, egy logikai &quot;<emphasis>nincsTárolt</emphasis>&quot; változó annak eltárolására, hogy van-e érték a &quot;tarsolyunkban&quot;, és egy dupla-pontosságú lebegőpontos szám, a &quot;<emphasis>tárolt</emphasis>&quot;, ami ezt az értéket fogja tartalmazni; valamint lesz egy metódusuk, ami a következő értékeket fogja mindig generálni (&quot;következő()&quot;). Az osztályunknak emellett lesz egy ún. konstruktora is, ami le fog lefutni minden egyes objektumpéldány létrehozásakor.
-            <programlisting language="java"><![CDATA[
+		<para>
+			<emphasis>A feladat:</emphasis> Implementáljuk a polátranszformációs alapú randomgenerátor algoritmust Java nyelven. Vizsgáljuk meg mi a különbség a mi implementációnk és a hivatalos OpenJDK-ban lévő implementáció között objektum-orientáltság szempontból! Kiindulási alapként használható a következő diasor: <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf">https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf</link> (16-22. fólia).
+		</para>
+		<para>
+			Ahogy a mellékelt diasori segédletből is látható, viszonylag nincs bonyolult dolgunk, alapvető OO koncepciókat kell felhasználnunk csak. Először is létre kell hoznunk egy osztályt &quot;<emphasis>PolárGenerátor</emphasis>&quot; néven. Osztályok segítségével tudjuk leírni, hogyan is épül fel egy adott típusú objektum: milyen fieldjei és metódusai lesznek. A mi <emphasis>PolárGenerátor</emphasis> objektumaink márpedig viszonylag triviálisak lesznek. Lesz két fieldjük, egy logikai &quot;<emphasis>nincsTárolt</emphasis>&quot; változó annak eltárolására, hogy van-e érték a &quot;tarsolyunkban&quot;, és egy dupla-pontosságú lebegőpontos szám, a &quot;<emphasis>tárolt</emphasis>&quot;, ami ezt az értéket fogja tartalmazni; valamint lesz egy metódusuk, ami a következő értékeket fogja mindig generálni (&quot;következő()&quot;). Az osztályunknak emellett lesz egy ún. konstruktora is, ami le fog lefutni minden egyes objektumpéldány létrehozásakor.
+			<programlisting language="java"><![CDATA[
 public class PolárGenerátor {
 
-    // a két fieldünk
-    boolean nincsTárolt;
-    double tárolt;
+	// a két fieldünk
+	boolean nincsTárolt;
+	double tárolt;
 
-    // a konstrukor
-    public PolárGenerátor() {
-        nincsTárolt = true;
-    }
+	// a konstrukor
+	public PolárGenerátor() {
+		nincsTárolt = true;
+	}
 
-    // a következő() metódus (pontosabban egyelőre csak a szignatúrája)
-    public double következő() {}
+	// a következő() metódus (pontosabban egyelőre csak a szignatúrája)
+	public double következő() {}
 }
-            ]]></programlisting>
-        </para>
-        <para>
-            <!--http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583-->
-        </para>
-    </section>
+			]]></programlisting>
+		</para>
+		<para>
+			<!--http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583-->
+		</para>
+	</section>
 	<section>
 		<title>Homokozó</title>
-    </section>
-    <section>
-        <title>&quot;Gagyi&quot;</title>
-    </section>
-    <section>
-        <title>Yoda</title>
-    </section>
-    <section>
-        <title>Kódolás from Scratch</title>
-    </section>
+		<para>
+			<emphasis>A feladat:</emphasis> A C++-os LZW bináris fás kódot portoljuk át Javára és elemezzük a különbségeket. Implementáljuk, hogy Java Servletek segítségével legyenek kiíratva a keletkező fák.
+		</para>
+		<para>
+			Némi refresherként, az eredeti C++ kód ugyanebből a könyvből:
+			<programlisting language="cpp"><![CDATA[
+#include <iostream>
+#include <unistd.h>
+
+using namespace std;
+
+class Tree
+{
+	private:
+		class Node
+		{
+			private:
+				int ertek;
+				Node *bal;
+				Node *jobb;
+
+			public:
+				Node(int val) { ertek = val; bal = jobb = NULL; }
+
+				~Node() { delete bal; delete jobb; }
+
+				Node * balra() { return bal; }
+
+				Node * jobbra() { return jobb; }
+
+				Node * balra(Node *ujBalLevel) { bal = ujBalLevel; }
+
+				Node * jobbra(Node *ujJobbLevel) { jobb = ujJobbLevel; }
+
+				int & tartalma() { return ertek; }
+		};
+
+		Node *position;
+
+		void resetPosition() { position = root; }
+
+	public:
+		Node *root;
+
+		Tree() { root = new Node('/'); resetPosition(); }
+
+		~Tree() { delete root; }
+
+		void addElement(int value)
+		{
+			if (value < 128)
+				if (position->balra() == NULL)
+				{
+					position->balra(new Node(value));
+					resetPosition();
+				}
+				else
+					position = position->balra();
+			else
+				if (position->jobbra() == NULL)
+				{
+					position->jobbra(new Node(value));
+					resetPosition();
+				}
+				else
+					position = position->jobbra();
+		}
+
+		void printInorder(Node * elem)
+		{
+			if (elem != NULL)
+			{
+				printInorder(elem -> balra());
+				cout << elem -> tartalma() << endl;
+				printInorder(elem -> jobbra());
+			}
+		}
+};
+
+int main()
+{
+	Tree *fa = new Tree();
+	unsigned char b;
+
+	while (read(fileno(stdin), (void *) &b, sizeof(b))) fa->addElement(b);
+
+	fa->printInorder(fa->root);
+
+	cout << "done" << endl;
+	return 0;
+}
+			]]></programlisting>
+		</para>
+		<para>
+			A cél tehát az, hogy ezt Java kóddá alakítsuk. Először is szükség lesz egy &quot;<emphasis>Tree</emphasis>&quot; osztályra, amiben el kell helyezzük a gyökérelemet. Ugyanitt fogjuk definiálni azt a metódust, ami elemeket ad hozzá ehhez a fához, valamint a fát kiírató algoritmusokat is (ezesetben csak inorder bejárást pontosabban). Mivel valamilyen típussal a gyökérelemeknek is rendelkeznie kell, és nem árt ha azok az objektumok is valamennyire "intelligensek" lesznek, egy külön osztályt kell majd számukra létrehozni &quot;<emphasis>Node</emphasis>&quot; néven. Ennek az osztálynak a példányai lesznek a mi csomópontjaink, a fánk / fáink építőelemei.
+		</para>
+	</section>
+	<section>
+		<title>&quot;Gagyi&quot;</title>
+	</section>
+	<section>
+		<title>Yoda</title>
+		<para>
+			<emphasis>A feladat:</emphasis> Írjunk egy olyan programot, ami NullPointerException-nel leáll, ha nem az ún. Yoda-stílusban írunk meg egy feltételt benne. (Segítség: <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions)</link>)
+		</para>
+		<para>
+			Ahogy a hivatkozott Wikipédia cikkben is olvasható, a Yoda-feltételek a megnevezett Star Wars szereplő filmbéli beszédstílusát hivatottak felidézni. Lényege, hogy nem a változótartalomhoz hasonlítjuk a konstansunk, hanem a konstanshoz hasonlítjuk a változónk. Ezt két problémaforrás elkerülésére használják.
+		</para>
+		<para>
+			Az egyik a C-stílusú nyelvek sajátosságából ered, nevezetesen hogy assignment során az eltárolt érték visszaadásra kerül. Emiatt könnyen előfordulhat, hogy ha véletlenül összehasonlítás helyett assignmentet teszünk egy feltétel helyére (ami nem nehéz, csupán egy darab egyenlőségjelet téve kettő helyett már meg is van a baj), az elágazás szinte biztosan igazként fog kiértékelődni, ami nem várt működéshez vezethet. A Yoda-stílust alkalmazva viszont fordítási hibát kapunk, hisz konstanshoz értéket rendelni nem lehet.
+			<!--kódpélda-->
+		</para>
+		<para>
+			A másik problémaforrás a null értékekkel kapcsolatos. Mivel a NullPointerException futásidejű hiba, ami kezeletlenül az egész programot megakaszthatja a működésben, a Yoda-stílus alkalmazásával el lehet kerülni egy ilyen mértékű problémát viszonylag könnyen. Ha egy konstanst hasonlítunk össze egy nullértékkel és nem fordítva, akkor az összehasonlítás hamisként fog kiértékelődni ahelyett hogy kivétel dobódna. Ez azonban még mindig okozhat gondokat, szóval az ilyen jellegű felhasználás továbbra sem ideális.
+			<!--kódpélda-->
+		</para>
+	</section>
+	<section>
+		<title>Kódolás from Scratch</title>
+	</section>
 </chapter>
