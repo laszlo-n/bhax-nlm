@@ -1,0 +1,23 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Liskov!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>Liskov helyettesítés sértése</title>
+	</section>
+	<section>
+		<title>Szülő-gyerek</title>
+	</section>
+	<section>
+		<title>Anti OO</title>
+	</section>
+	<section>
+		<title>Hello, Android!</title>
+	</section>
+	<section>
+		<title>Ciklomatikus komplexitás</title>
+	</section>
+</chapter>
