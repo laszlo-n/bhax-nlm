@@ -11,7 +11,7 @@
 			<emphasis>A feladat:</emphasis> Implementáljuk a polátranszformációs alapú randomgenerátor algoritmust Java nyelven. Vizsgáljuk meg mi a különbség a mi implementációnk és a hivatalos OpenJDK-ban lévő implementáció között objektum-orientáltság szempontból! Kiindulási alapként használható a következő diasor: <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf">https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf</link> (16-22. fólia).
 		</para>
 		<para>
-			Ahogy a mellékelt diasori segédletből is látható, viszonylag nincs bonyolult dolgunk, alapvető OO koncepciókat kell felhasználnunk csak. Először is létre kell hoznunk egy osztályt &quot;<emphasis>PolárGenerátor</emphasis>&quot; néven. Osztályok segítségével tudjuk leírni, hogyan is épül fel egy adott típusú objektum: milyen fieldjei és metódusai lesznek. A mi <emphasis>PolárGenerátor</emphasis> objektumaink márpedig viszonylag triviálisak lesznek. Lesz két fieldjük, egy logikai &quot;<emphasis>nincsTárolt</emphasis>&quot; változó annak eltárolására, hogy van-e érték a &quot;tarsolyunkban&quot;, és egy dupla-pontosságú lebegőpontos szám, a &quot;<emphasis>tárolt</emphasis>&quot;, ami ezt az értéket fogja tartalmazni; valamint lesz egy metódusuk, ami a következő értékeket fogja mindig generálni (&quot;következő()&quot;). Az osztályunknak emellett lesz egy ún. konstruktora is, ami le fog lefutni minden egyes objektumpéldány létrehozásakor.
+			Ahogy a mellékelt diasori segédletből is látható, viszonylag nincs bonyolult dolgunk, alapvető OO koncepciókat kell felhasználnunk csak. Először is létre kell hoznunk egy osztályt &quot;<emphasis>PolárGenerátor</emphasis>&quot; néven. Osztályok segítségével tudjuk leírni, hogyan is épül fel egy adott típusú objektum: milyen fieldjei és metódusai lesznek. A mi <emphasis>PolárGenerátor</emphasis> objektumaink márpedig viszonylag triviálisak lesznek. Lesz két fieldjük, egy logikai &quot;<emphasis>nincsTárolt</emphasis>&quot; változó annak eltárolására, hogy van-e érték a &quot;tarsolyunkban&quot;, és egy dupla-pontosságú lebegőpontos szám, a &quot;<emphasis>tárolt</emphasis>&quot;, ami ezt az értéket fogja tartalmazni; valamint lesz egy metódusuk, ami a következő értékeket fogja mindig generálni (&quot;következő()&quot;). Az osztályunknak emellett lesz egy konstruktora is, ami ugye le fog lefutni minden egyes objektumpéldány létrehozásakor.
 			<programlisting language="java"><![CDATA[
 public class PolárGenerátor {
 
@@ -24,13 +24,13 @@ public class PolárGenerátor {
 		nincsTárolt = true;
 	}
 
-	// a következő() metódus (pontosabban egyelőre csak a szignatúrája)
+	// a következő() metódus (pontosabban csak a szignatúrája)
 	public double következő() {}
 }
 			]]></programlisting>
 		</para>
 		<para>
-			<!--http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583-->
+			Ahogy az a <link xlink:href="http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583">http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583</link> oldalon is látható, a hivatalos implementáció gyakorlatilag carbon copy-ja a miénknek, pedig ez már a 13-as JDK. Érdemes lehet figyelni a linkelt sort megelőző kommentekre is, jelölik hogy a synchronized kulcsszó nyomán ugye a metódus thread-safe (több szálról random számot generálva sem korruptálják a shared state-t a lefutó metódusok), illetve hogy a StrictMath osztály van használva, a precízió biztosítása érdekében.
 		</para>
 	</section>
 	<section>
@@ -129,11 +129,177 @@ int main()
 			]]></programlisting>
 		</para>
 		<para>
-			A cél tehát az, hogy ezt Java kóddá alakítsuk. Először is szükség lesz egy &quot;<emphasis>Tree</emphasis>&quot; osztályra, amiben el kell helyezzük a gyökérelemet. Ugyanitt fogjuk definiálni azt a metódust, ami elemeket ad hozzá ehhez a fához, valamint a fát kiírató algoritmusokat is (ezesetben csak inorder bejárást pontosabban). Mivel valamilyen típussal a gyökérelemeknek is rendelkeznie kell, és nem árt ha azok az objektumok is valamennyire "intelligensek" lesznek, egy külön osztályt kell majd számukra létrehozni &quot;<emphasis>Node</emphasis>&quot; néven. Ennek az osztálynak a példányai lesznek a mi csomópontjaink, a fánk / fáink építőelemei.
+			A cél tehát az, hogy ezt Java kóddá alakítsuk. Először is szükség lesz egy &quot;<emphasis>Tree</emphasis>&quot; osztályra, amiben el kell helyezzük a gyökérelemet. Ugyanitt fogjuk definiálni azt a metódust, ami elemeket ad hozzá ehhez a fához, valamint a fát kiírató algoritmusokat is (ezesetben csak inorder bejárást pontosabban). Mivel valamilyen típussal a gyökérelemeknek is rendelkeznie kell, és nem árt ha azok az objektumok is valamennyire "intelligensek" lesznek, egy külön osztályt kell majd számukra létrehozni &quot;<emphasis>Node</emphasis>&quot; néven. Ennek az osztálynak a példányai lesznek a mi csomópontjaink, a fánk / fáink építőelemei. Hogy spóroljak az időmmel, a <link xlink:href="https://www.baeldung.com/java-binary-tree">https://www.baeldung.com/java-binary-tree</link> oldal tartalmát használtam fel és igazítottam vissza az előbb látható C++ kódhoz:
+			<programlisting language="java"><![CDATA[
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+
+public class BinaryTree {
+
+    Node root;
+
+    public void add(int value) {
+        root = addRecursive(root, value);
+    }
+
+    private Node addRecursive(Node current, int value) {
+
+        if (current == null) {
+            return new Node(value);
+        }
+
+        if (value < current.value) {
+            current.left = addRecursive(current.left, value);
+        } else if (value > current.value) {
+            current.right = addRecursive(current.right, value);
+        }
+
+        return current;
+    }
+
+    public boolean isEmpty() {
+        return root == null;
+    }
+
+    public int getSize() {
+        return getSizeRecursive(root);
+    }
+
+    private int getSizeRecursive(Node current) {
+        return current == null ? 0 : getSizeRecursive(current.left) + 1 + getSizeRecursive(current.right);
+    }
+
+    public boolean containsNode(int value) {
+        return containsNodeRecursive(root, value);
+    }
+
+    private boolean containsNodeRecursive(Node current, int value) {
+        if (current == null) {
+            return false;
+        }
+
+        if (value == current.value) {
+            return true;
+        }
+
+        return value < current.value
+          ? containsNodeRecursive(current.left, value)
+          : containsNodeRecursive(current.right, value);
+    }
+
+    public void delete(int value) {
+        root = deleteRecursive(root, value);
+    }
+
+    private Node deleteRecursive(Node current, int value) {
+        if (current == null) {
+            return null;
+        }
+
+        if (value == current.value) {
+            // Case 1: no children
+            if (current.left == null && current.right == null) {
+                return null;
+            }
+
+            // Case 2: only 1 child
+            if (current.right == null) {
+                return current.left;
+            }
+
+            if (current.left == null) {
+                return current.right;
+            }
+
+            // Case 3: 2 children
+            int smallestValue = findSmallestValue(current.right);
+            current.value = smallestValue;
+            current.right = deleteRecursive(current.right, smallestValue);
+            return current;
+        }
+        if (value < current.value) {
+            current.left = deleteRecursive(current.left, value);
+            return current;
+        }
+
+        current.right = deleteRecursive(current.right, value);
+        return current;
+    }
+
+    private int findSmallestValue(Node root) {
+        return root.left == null ? root.value : findSmallestValue(root.left);
+    }
+
+    public void traverseInOrder(Node node) {
+        if (node != null) {
+            traverseInOrder(node.left);
+            visit(node.value);
+            traverseInOrder(node.right);
+        }
+    }
+
+    public void traverseLevelOrder() {
+        if (root == null) {
+            return;
+        }
+
+        Queue<Node> nodes = new LinkedList<>();
+        nodes.add(root);
+
+        while (!nodes.isEmpty()) {
+
+            Node node = nodes.remove();
+
+            System.out.print(" " + node.value);
+
+            if (node.left != null) {
+                nodes.add(node.left);
+            }
+
+            if (node.left != null) {
+                nodes.add(node.right);
+            }
+        }
+    }
+
+    
+    public void traverseInOrderWithoutRecursion() {
+        Stack<Node> stack = new Stack<Node>();
+        Node current = root;
+        stack.push(root);
+        while(! stack.isEmpty()) {
+            while(current.left != null) {
+                current = current.left;                
+                stack.push(current);                
+            }
+            current = stack.pop();
+            visit(current.value);
+            if(current.right != null) {
+                current = current.right;                
+                stack.push(current);
+            }
+        }
+    }
+    
+    private void visit(int value) {
+        System.out.print(" " + value);        
+    }
+    
+    class Node {
+        int value;
+        Node left;
+        Node right;
+
+        Node(int value) {
+            this.value = value;
+            right = null;
+            left = null;
+        }
+    }
+}
+]]></programlisting>
 		</para>
-	</section>
-	<section>
-		<title>&quot;Gagyi&quot;</title>
 	</section>
 	<section>
 		<title>Yoda</title>
@@ -145,14 +311,25 @@ int main()
 		</para>
 		<para>
 			Az egyik a C-stílusú nyelvek sajátosságából ered, nevezetesen hogy assignment során az eltárolt érték visszaadásra kerül. Emiatt könnyen előfordulhat, hogy ha véletlenül összehasonlítás helyett assignmentet teszünk egy feltétel helyére (ami nem nehéz, csupán egy darab egyenlőségjelet téve kettő helyett már meg is van a baj), az elágazás szinte biztosan igazként fog kiértékelődni, ami nem várt működéshez vezethet. A Yoda-stílust alkalmazva viszont fordítási hibát kapunk, hisz konstanshoz értéket rendelni nem lehet.
-			<!--kódpélda-->
+			<programlisting language="java"><![CDATA[
+if (peldaSzam = 42) {} // igazként értékelődik ki, mivel assignment
+
+/* ... */
+
+if (42 = peldaSzam) {} // compilation-time error, mivel literálnak próbálunk értéket adni, ami értelmetlen
+]]></programlisting>
 		</para>
 		<para>
 			A másik problémaforrás a null értékekkel kapcsolatos. Mivel a NullPointerException futásidejű hiba, ami kezeletlenül az egész programot megakaszthatja a működésben, a Yoda-stílus alkalmazásával el lehet kerülni egy ilyen mértékű problémát viszonylag könnyen. Ha egy konstanst hasonlítunk össze egy nullértékkel és nem fordítva, akkor az összehasonlítás hamisként fog kiértékelődni ahelyett hogy kivétel dobódna. Ez azonban még mindig okozhat gondokat, szóval az ilyen jellegű felhasználás továbbra sem ideális.
-			<!--kódpélda-->
+			<programlisting language="java"><![CDATA[
+String myString = null;
+if (myString.equals("foobar")) { } // elszáll NullPointerException-nel, obviously
+
+/* ... */
+
+String myString = null;
+if ("foobar".equals(myString)) { } // ez viszont nem!
+]]></programlisting>
 		</para>
-	</section>
-	<section>
-		<title>Kódolás from Scratch</title>
 	</section>
 </chapter>

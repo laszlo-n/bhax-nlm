@@ -7,17 +7,99 @@
 	</info>
 	<section>
 		<title>Liskov helyettesítés sértése</title>
+		<para>A Liskov helyettesítési szabály az ún. SOLID tervezési minta 5 alapelve közül az egyik. A mögötte rejlő gondolatmenetet bár könnyű demonstrálni, alkalmazni, és alkalmazásának hiányát észrevenni azonban nem mindig egyszerű</para>
+		<para>Az alapvetés a következő: vegyünk egy osztályt, és egy leszármazott osztályt. A Liskov helyettesítési elv kimondja, hogy ahol az általánosabb osztályt használjuk, annak a helyére a speciálisabb osztály(ok)nak is behelyettesíthetőnek kell lennie, a kód működésének megváltozása nélkül.</para>
+		<para>Vegyük először a hivatkozott madaras példát. Forrása a <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovsert.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovsert.cpp.</link>
+		<programlisting language="c"><![CDATA[
+// ez a T az LSP-ben
+class Madar {
+public:
+     virtual void repul() {};
+};
+
+// ez a két osztály alkotja a "P programot" az LPS-ben
+class Program {
+public:
+     void fgv ( Madar &madar ) {
+          madar.repul();
+     }
+};
+
+// itt jönnek az LSP-s S osztályok
+class Sas : public Madar
+{};
+
+class Pingvin : public Madar // ezt úgy is lehet/kell olvasni, hogy a pingvin tud repülni
+{};
+
+int main ( int argc, char **argv )
+{
+     Program program;
+     Madar madar;
+     program.fgv ( madar );
+
+     Sas sas;
+     program.fgv ( sas );
+
+     Pingvin pingvin;
+     program.fgv ( pingvin ); // sérül az LSP, mert a P::fgv röptetné a Pingvint, ami ugye lehetetlen.
+
+}
+		]]></programlisting>
+		Láthatjuk, hogy van egy <emphasis>Madar</emphasis> nevű osztályunk, amelyből származtatunk egy <emphasis>Pingvin</emphasis> és egy <emphasis>Sas</emphasis> alosztályt. Biológiai értelemben ez helytálló - mindkét állatfaj a madarak csoportjába tartozik. A probléma ott kezdődik viszont, amikor a Madar osztálynál definiáljuk a <emphasis>repul()</emphasis> metódust.</para>
+		<para>Mivel a Madar osztály szintjén definiáltuk a repul() metódust, ezzel azt sugalljuk hogy minden alosztály is képes ugyanerre. Márpedig a pingvinek nem röpképesek, tehát ezzel a kóddal rosszul képezzük le az eredeti kisvilágot. Lássuk tehát, hogyan lehet ezt orvosolni! Forrása a hivatkozott <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovrafigyel.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovrafigyel.cpp.</link>
+		<programlisting language="c"><![CDATA[
+// ez a T az LSP-ben
+class Madar {
+//public:
+//  void repul(){};
+};
+
+// ez a két osztály alkotja a "P programot" az LPS-ben
+class Program {
+public:
+     void fgv ( Madar &madar ) {
+          // madar.repul(); a madár már nem tud repülni
+          // s hiába lesz a leszármazott típusoknak
+          // repül metódusa, azt a Madar& madar-ra úgysem lehet hívni
+     }
+};
+
+// itt jönnek az LSP-s S osztályok
+class RepuloMadar : public Madar {
+public:
+     virtual void repul() {};
+};
+
+class Sas : public RepuloMadar
+{};
+
+class Pingvin : public Madar // ezt úgy is lehet/kell olvasni, hogy a pingvin tud repülni
+{};
+
+int main ( int argc, char **argv )
+{
+     Program program;
+     Madar madar;
+     program.fgv ( madar );
+
+     Sas sas;
+     program.fgv ( sas );
+
+     Pingvin pingvin;
+     program.fgv ( pingvin );
+}
+		]]></programlisting>
+		Mint azt láthatjuk, elszeparáltuk a röpképes madarakat a röpképtelenektől; egy extra absztrakciós szint bevezetésével kijavítottuk a leképezett kisvilágot. Most már hiába hívjuk meg a repul()-t az altípusokra, csak az a madárfajta fog repülni, ami valóban tud is.</para>
 	</section>
 	<section>
 		<title>Szülő-gyerek</title>
-	</section>
-	<section>
-		<title>Anti OO</title>
-	</section>
-	<section>
-		<title>Hello, Android!</title>
+		<para>
+			Ez a feladat a statikus és a dinamikus kötés közti különbségről szól. Statikus kötésről akkor beszélünk, amikor a compiler fordítási időben resolve-olni tudja, melyik osztály metódusa lesz futtatva, hiszen ilyenkor metódus overloadingról beszélünk, nem pedig overridingról. Ilyenkor az osztályhierarchiában a minél "korábbi", minél inkább szülőosztály metódusa kerül kiválasztásra. Egyéb esetben metódus overridingról van szó, amit &at;Override annotációval is jelölni szokás. Ilyenkor mind a superclass mind a subclass metódusa nem-statikus, ilyenkor a metódus rezolúció tehát futásidőben történik meg. Ezt kései vagy dinamikus kötésnek hívjuk. Ekkor az objektumreferencia határozza meg, melyik metódus lesz lefuttatva, nem pedig az objektumtípus. Példákért lásd: <link xlink:href="https://www.geeksforgeeks.org/can-we-overload-or-override-static-methods-in-java/">https://www.geeksforgeeks.org/can-we-overload-or-override-static-methods-in-java/</link>
+		</para>
 	</section>
 	<section>
 		<title>Ciklomatikus komplexitás</title>
+		<!-- https://dzone.com/articles/measuring-code-complexity -->
 	</section>
 </chapter>
