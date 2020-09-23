@@ -27,5 +27,5 @@ jobs:
         run: sudo apt install -y docbook docbook-xml docbook-xsl xsltproc build-essential dblatex graphviz texlive-lang-european
 
       # Runs a single command using the runners shell
-      - name: Display success
-        run: echo Book writing successful!
+      - name: Make book
+        run: cd ./bhax_textbook && make
