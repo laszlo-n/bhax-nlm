@@ -26,9 +26,17 @@ jobs:
       - name: Set up dependencies
         run: sudo apt install -y docbook docbook-xml docbook-xsl docbook-xsl-ns xsltproc build-essential dblatex graphviz texlive-lang-european
 
+      # Verify dblatex is installed
+      - name: Test for dblatex
+        run: dblatex --version
+
       # Runs a single command using the runners shell
       - name: Make book
         run: cd ./bhax_textbook && make
+
+      # Verifying directory contents
+      - name: Sanity check for files
+        run: ls -lA
 
       # Publish book
       - name: Publish book
