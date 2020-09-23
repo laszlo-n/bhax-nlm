@@ -36,11 +36,11 @@ jobs:
 
       # Verifying directory contents
       - name: Sanity check for files
-        run: ls -lA
+        run: cd ./bhax_textbook && ls -lA
 
       # Publish book
       - name: Publish book
         uses: actions/upload-artifact@v2
         with:
           name: bhax
-          path: bhax-textbook-fdl.pdf
+          path: ./bhax_textbook/bhax-textbook-fdl.pdf
