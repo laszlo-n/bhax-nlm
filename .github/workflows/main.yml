@@ -29,3 +29,10 @@ jobs:
       # Runs a single command using the runners shell
       - name: Make book
         run: cd ./bhax_textbook && make
+
+      # Publish book
+      - name: Publish book
+        uses: actions/upload-artifact@v2
+        with:
+          name: bhax
+          path: bhax-textbook-fdl.pdf
