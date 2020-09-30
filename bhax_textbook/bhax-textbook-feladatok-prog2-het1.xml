@@ -332,4 +332,22 @@ if ("foobar".equals(myString)) { } // ez viszont nem!
 ]]></programlisting>
 		</para>
 	</section>
+	<section>
+		<title>EPAM: Java Object metódusok</title>
+		<para>
+			A Java nyelvben, és az objektum-orientált nyelvekben úgy általánosságban, minden osztály egy bizonyos ősosztály, az <emphasis>Object</emphasis> osztály egy kiterjesztése. Ez azt jelenti, hogy minden metódus ami az Object osztályban példányszinten definiálva van, meghívható lesz minden objektumra. Előfordulha azonban, hogy mi ezen a közös funkcionalitáson változtatni szeretnénk - Javaban erre természetesen lehetőségünk is van. Nézzük milyen főbb metódusokat ad nekünk az <emphasis>Object</emphasis> osztály, és mikor érdemes őket felüldefiniálni (<emphasis>override</emphasis>-olni)!
+		</para>
+		<para>
+			<emphasis>equals():</emphasis> Az <emphasis>equals()</emphasis> metódus érték szerinti összehasonlításra használatos. Gyakorlatilag mindig érdemes felüldefiniálni, ezzel tudjuk elérni, hogy például csak szelektíven, néhány mezőt figyelembe véve állapítsunk meg egyenlőséget két objektumpéldányunk között. Fontos, hogy ha ezt felüldefiniáljuk, és valóban szelektíven csak néhány mezőt használunk, akkor muszáj lesz a <emphasis>hashCode()</emphasis> metódust is felüldefiniálnunk, hiszen <emphasis>contract</emphasis> szerint ha két objektumnak egyező a hash-e, az <emphasis>equals()</emphasis> is igazt kell visszaadjon az összehasonlításukkor. És ha már <emphasis>hashCode()</emphasis>...
+		</para>
+		<para>
+			<emphasis>hashCode():</emphasis> A <emphasis>hashCode()</emphasis> függvény visszaad egy számot, ami egyedien jellemzi az adott objektumpéldányt. Ez sok alkalommal lehet hasznos, például különböző hash table-ök létrehozásánál és objektumok összehasonlításánál. Lehet például úgy újradefiniálni az <emphasis>equals()</emphasis>-t, hogy meghívja a <emphasis>hashCode()</emphasis>-ot és összehasonlítja az értéküket, így csak egy helyen kell specifikálnunk, hogy milyen field-ek számítanak nekünk az objektumok egyenlőségének megállapításakor.
+		</para>
+		<para>
+			<emphasis>toString():</emphasis> Azt befolyásolja, hogy egy objektum hogyan alakítható sztringgé, miként szerializálható szövegként. Ezt akkor hasznos felüldefiniálni, ha log kimenetbe szeretnénk olvashatóbb outputot helyezni.
+		</para>
+		<para>
+			<emphasis>clone():</emphasis> A <emphasis>clone()</emphasis> egy értékalapú másolatot hoz létre az adott objektumpéldányból, ezzel lehetővé tévve, hogy ne eregessünk mindenfelé referenciákat egy adott objektumról. Rendkívül hasznos tud lenni, mivel értékalapú másolatok használatával elkerülhetjük a véletlen side-effecteket, és átláthatóbban tarthatjuk a kódot.
+		</para>
+	</section>
 </chapter>
