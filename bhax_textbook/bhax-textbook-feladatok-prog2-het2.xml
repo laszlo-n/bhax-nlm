@@ -128,5 +128,8 @@ int main ( int argc, char **argv )
 				</listitem>
 			</itemizedlist>
 		</para>
+		<para>
+			Bekerült továbbá emellett a lehetőség static metódusok használatára is. Ezeket a hagyományos úton lehet létrehozni és használni.
+		</para>
 	</section>
 </chapter>
