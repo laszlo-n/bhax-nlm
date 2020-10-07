@@ -111,4 +111,10 @@ int main ( int argc, char **argv )
 		<!-- https://dzone.com/articles/measuring-code-complexity -->
 		<para></para>
 	</section>
+	<section>
+		<title>EPAM: Interfész evolúció Java-ban</title>
+		<para>
+			Java 8 előtt az interfészek kizárólag konstansok és abstract metódusok számára voltak fenntartva, és bármilyen osztály ami az adott interfészt implementálta, minden ilyen metódust implementálnia kellett, vagy saját magának is abstractként deklaráltnak kellett maradnia. Ami tehát megváltozott, az az, hogy most már lehetnek teljes metódusok is az interfészekben; ún. default metódusok. Ez lehetővé teszi, hogy azok az osztályok amelyek implementálnak egy interfészt, megspórolhassák az ilyen metódusok implementálását. Azonban mivel egy osztály több interfészt is implementálhat, többször is lehet egy adott metódus default definiálva.
+		</para>
+	</section>
 </chapter>
