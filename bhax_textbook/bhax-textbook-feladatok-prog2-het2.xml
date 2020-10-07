@@ -7,10 +7,15 @@
 	</info>
 	<section>
 		<title>Liskov helyettesítés sértése</title>
-		<para>A Liskov helyettesítési szabály az ún. SOLID tervezési minta 5 alapelve közül az egyik. A mögötte rejlő gondolatmenetet bár könnyű demonstrálni, alkalmazni, és alkalmazásának hiányát észrevenni azonban nem mindig egyszerű</para>
-		<para>Az alapvetés a következő: vegyünk egy osztályt, és egy leszármazott osztályt. A Liskov helyettesítési elv kimondja, hogy ahol az általánosabb osztályt használjuk, annak a helyére a speciálisabb osztály(ok)nak is behelyettesíthetőnek kell lennie, a kód működésének megváltozása nélkül.</para>
-		<para>Vegyük először a hivatkozott madaras példát. Forrása a <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovsert.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovsert.cpp.</link>
-		<programlisting language="c"><![CDATA[
+		<para>
+			A Liskov helyettesítési szabály az ún. SOLID tervezési minta 5 alapelve közül az egyik. A mögötte rejlő gondolatmenetet bár könnyű demonstrálni, alkalmazni, és alkalmazásának hiányát észrevenni azonban nem mindig egyszerű.
+		</para>
+		<para>
+			Az alapvetés a következő: vegyünk egy osztályt, és egy leszármazott osztályt. A Liskov helyettesítési elv kimondja, hogy ahol az általánosabb osztályt használjuk, annak a helyére a speciálisabb osztály(ok)nak is behelyettesíthetőnek kell lennie, a kód működésének megváltozása nélkül.
+		</para>
+		<para>
+			Vegyük először a hivatkozott madaras példát. Forrása a <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovsert.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovsert.cpp.</link>
+			<programlisting language="c"><![CDATA[
 // ez a T az LSP-ben
 class Madar {
 public:
@@ -46,9 +51,11 @@ int main ( int argc, char **argv )
 
 }
 		]]></programlisting>
-		Láthatjuk, hogy van egy <emphasis>Madar</emphasis> nevű osztályunk, amelyből származtatunk egy <emphasis>Pingvin</emphasis> és egy <emphasis>Sas</emphasis> alosztályt. Biológiai értelemben ez helytálló - mindkét állatfaj a madarak csoportjába tartozik. A probléma ott kezdődik viszont, amikor a Madar osztálynál definiáljuk a <emphasis>repul()</emphasis> metódust.</para>
-		<para>Mivel a Madar osztály szintjén definiáltuk a repul() metódust, ezzel azt sugalljuk hogy minden alosztály is képes ugyanerre. Márpedig a pingvinek nem röpképesek, tehát ezzel a kóddal rosszul képezzük le az eredeti kisvilágot. Lássuk tehát, hogyan lehet ezt orvosolni! Forrása a hivatkozott <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovrafigyel.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovrafigyel.cpp.</link>
-		<programlisting language="c"><![CDATA[
+		Láthatjuk, hogy van egy <emphasis>Madar</emphasis> nevű osztályunk, amelyből származtatunk egy <emphasis>Pingvin</emphasis> és egy <emphasis>Sas</emphasis> alosztályt. Biológiai értelemben ez helytálló - mindkét állatfaj a madarak csoportjába tartozik. A probléma ott kezdődik viszont, amikor a Madar osztálynál definiáljuk a <emphasis>repul()</emphasis> metódust.
+		</para>
+		<para>
+			Mivel a Madar osztály szintjén definiáltuk a repul() metódust, ezzel azt sugalljuk hogy minden alosztály is képes ugyanerre. Márpedig a pingvinek nem röpképesek, tehát ezzel a kóddal rosszul képezzük le az eredeti kisvilágot. Lássuk tehát, hogyan lehet ezt orvosolni! Forrása a hivatkozott <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovrafigyel.cpp">https://sourceforge.net/p/udprog/code/ci/master/tree/source/binom/Batfai-Barki/madarak/liskovrafigyel.cpp.</link>
+			<programlisting language="c"><![CDATA[
 // ez a T az LSP-ben
 class Madar {
 //public:
@@ -90,7 +97,8 @@ int main ( int argc, char **argv )
      program.fgv ( pingvin );
 }
 		]]></programlisting>
-		Mint azt láthatjuk, elszeparáltuk a röpképes madarakat a röpképtelenektől; egy extra absztrakciós szint bevezetésével kijavítottuk a leképezett kisvilágot. Most már hiába hívjuk meg a repul()-t az altípusokra, csak az a madárfajta fog repülni, ami valóban tud is.</para>
+		Mint azt láthatjuk, elszeparáltuk a röpképes madarakat a röpképtelenektől; egy extra absztrakciós szint bevezetésével kijavítottuk a leképezett kisvilágot. Most már hiába hívjuk meg a repul()-t az altípusokra, csak az a madárfajta fog repülni, ami valóban tud is.
+		</para>
 	</section>
 	<section>
 		<title>Szülő-gyerek</title>
@@ -101,5 +109,6 @@ int main ( int argc, char **argv )
 	<section>
 		<title>Ciklomatikus komplexitás</title>
 		<!-- https://dzone.com/articles/measuring-code-complexity -->
+		<para></para>
 	</section>
 </chapter>
