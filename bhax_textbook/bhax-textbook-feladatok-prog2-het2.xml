@@ -124,7 +124,7 @@ int main ( int argc, char **argv )
 					<para>Ha az interfészek között szülő-gyermek függőség áll fent, a gyermek interfész implementációja kerül felhasználásra.</para>
 				</listitem>
 				<listitem>
-					<para>NYI</para>
+					<para>Ha nincsenek ilyen függőségben és nincs az osztályban saját implementáció, a compiler hibát dob.</para>
 				</listitem>
 			</itemizedlist>
 		</para>
