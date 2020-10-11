@@ -132,4 +132,40 @@ int main ( int argc, char **argv )
 			Bekerült továbbá emellett a lehetőség static metódusok használatára is. Ezeket a hagyományos úton lehet létrehozni és használni.
 		</para>
 	</section>
+	<section>
+		<title>EPAM: Liskov-féle helyettesíthetőség elve, öröklődés</title>
+		<para>
+			A Liskov-behelyettesíthetőség (Liskov Substitution Principle) a jó objektum orientált design egyik alapköve. Ha az osztályhierarchia amit megalkottunk olyan, hogy az általunk kialakított osztályok példányosításakor bármilyen őstípust biztonsággal kicserélhetünk egy altípusra a működés megváltozása nélkül, akkor teljesül rá a Liskov-behelyettesíthetőség elve.
+		</para>
+		<para>
+			Az eredeti feladatkiírás a következő volt: Adott az alábbi osztály hierarchia: "class Vehicle", "class Car extends Vehicle", "class Supercar extends Car". Mindegyik osztály konstruktorában történik egy kiíratás, valamint a Vehicle osztályban szereplő <emphasis>start()</emphasis> metódus mindegyik alosztályban felül van definiálva. Mi történik ezen (lejjebb látható) kódok futtatása esetén, és miért?
+		</para>
+		<para>
+			Kezdjük először is a konstruktorokban való kiíratással. Amikor egy alosztályt példányosítunk, az összes ősosztály konstruktora végighívódik láncszerűen, a hierarchia tetejéről indulva. A példában említett osztályok esetén ezt azt jelentené, hogy a Supercar osztály példányosításakor, legelőször a Vehicle osztály konstruktra futna le, amit követne a Car osztályé, végül pedig a Supercar osztályé. Ez azért történik így, mert így az ősosztályok alapértékei beállításra kerülnek, pontosan úgy, ahogy erre számítanánk.
+		</para>
+		<para>
+			Folytassuk akkor a kóddal! A következő code snippet volt a feladat utasításába helyezve:
+			<programlisting language="java"><![CDATA[
+Vehicle firstVehicle = new Supercar();
+firstVehicle.start();
+System.out.println(firstVehicle instanceof Car);
+
+Car secondVehicle = (Car) firstVehicle;
+secondVehicle.start();
+System.out.println(secondVehicle instanceof Supercar);
+
+Supercar thirdVehicle = new Vehicle();
+thirdVehicle.start();
+		]]></programlisting>
+			A kódot háromfelé bontottam, a könnyebb olvashatóság érdekében. Nézzük végig blokkonként!
+		</para>
+		<para>
+			<programlisting language="java"><![CDATA[
+Vehicle firstVehicle = new Supercar();
+firstVehicle.start();
+System.out.println(firstVehicle instanceof Car);
+		]]></programlisting>
+			Itt mindenekelőtt létrehozunk egy járművet, melynek a típusa Supercar lesz, a dinamikus kötésnek köszönhetően.
+		</para>
+	</section>
 </chapter>
