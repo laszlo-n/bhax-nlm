@@ -1,0 +1,27 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Mandelbrot!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>EPAM: Neptun tantárgyfelvétel modellezése UML-ben</title>
+		<mediaobject>
+	     	<imageobject>
+				<imagedata fileref="images/fc2bf2ff.png" format="PNG">
+	    	</imageobject> 
+			<caption>
+				<para>Az általam megtervezett osztályhierarchia és mezőik.</para>
+			</caption>
+		</mediaobject>
+	</section>
+	<section>
+		<title>EPAM: Neptun tantárgyfelvétel UML diagram implementálása</title>
+		<para></para>
+	</section>
+	<section>
+		<title>EPAM:OO modellezés</title>
+		<para></para>
+	</section>
+</chapter>
