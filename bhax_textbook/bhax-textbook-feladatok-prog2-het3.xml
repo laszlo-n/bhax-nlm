@@ -7,14 +7,16 @@
 	</info>
 	<section>
 		<title>EPAM: Neptun tantárgyfelvétel modellezése UML-ben</title>
-		<mediaobject>
-	     	<imageobject>
-				<imagedata fileref="images/fc2bf2ff.png" format="PNG">
-	    	</imageobject> 
-			<caption>
-				<para>Az általam megtervezett osztályhierarchia és mezőik.</para>
-			</caption>
-		</mediaobject>
+		<figure>
+			<mediaobject>
+		     	<imageobject>
+					<imagedata fileref="images/fc2bf2ff.png" format="PNG"/>
+		    	</imageobject> 
+				<caption>
+					<para>Az általam megtervezett osztályhierarchia és mezőik.</para>
+				</caption>
+			</mediaobject>
+		</figure>
 	</section>
 	<section>
 		<title>EPAM: Neptun tantárgyfelvétel UML diagram implementálása</title>
