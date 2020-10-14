@@ -7,23 +7,26 @@
 	</info>
 	<section>
 		<title>EPAM: Neptun tantárgyfelvétel modellezése UML-ben</title>
-		<figure>
-			<mediaobject>
-		     	<imageobject>
-					<imagedata fileref="images/fc2bf2ff.png" format="PNG"/>
-		    	</imageobject> 
-				<caption>
-					<para>Az általam megtervezett osztályhierarchia és mezőik.</para>
-				</caption>
-			</mediaobject>
-		</figure>
+		<para>
+			<informalfigure>
+				<graphic fileref="images/fc2bf2ff.png"></graphic>
+			</informalfigure>
+		</para>
 	</section>
 	<section>
 		<title>EPAM: Neptun tantárgyfelvétel UML diagram implementálása</title>
 		<para></para>
 	</section>
 	<section>
-		<title>EPAM:OO modellezés</title>
-		<para></para>
+		<title>EPAM: OO modellezés</title>
+		<para>
+			OO modellezés során többféle megközelítés lehetséges. A cél általában mindig a flexibilitás fenntartása, felesleges komplexitás és technical debt hozzáadásának elkerülésével. Erre kitaláltak már korábban pár elvet, vegyük is őket sorra!
+		</para>
+		<para>
+			<emphasis>YAGNI:</emphasis> Rövidítése a "you aint gonna need it" kifejezésnek, azaz hogy "nem lesz rá szükséged". Célja az overengineering megfékezése azáltal, hogy elgondolkodtat arról, valóban szükségünk van-e egy adott absztrakcióra, vagy ráér-e még később. Természetéből adódóan ez szükségszerűvé teszi pl. a folytonos refaktorálás, a folytonos unit tesztelést és a folytonos integrációt. Nem megfelelően alkalmazva könnyedén okozhat kaotikus kódbázist, és nagy technical debtet.
+		</para>
+		<para>
+			<emphasis>DRY:</emphasis> Rövidítése a "don't repeat yourself"-nek, azaz hogy "ne ismételd magad". Célja a kód duplikáció minimalizálása, és az ezek miatt kialakuló bugok elkerülése.
+		</para>
 	</section>
 </chapter>
