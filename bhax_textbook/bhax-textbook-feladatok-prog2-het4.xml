@@ -1,0 +1,26 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Chomsky!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>EPAM: Order of Everything</title>
+		<para>
+			Nem sikerült megoldani, nem tudom értelmezni a feladatot. A wildcard típusokkal is eléggé bekavarodtam.
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Bináris keresés és buborékrendezés implementálása</title>
+		<para>
+			A kódot a book-sources mappába tettem integer-storage néven.
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Saját HashMap implementáció</title>
+		<para>
+			A kódot a book-sources mappába tettem sajat-map néven.
+		</para>
+	</section>
+</chapter>
