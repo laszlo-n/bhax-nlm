@@ -1,0 +1,99 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Stroustrup!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>EPAM: It's gone. Or is it?</title>
+		<para>
+			Adott volt az alábbi kódrészlet:
+			<programlisting language="java"><![CDATA[
+public class BugousStuffProducer {
+	private final Writer writer;
+
+	public BugousStuffProducer(String outputFileName) throws IOException {
+		writer = new FileWriter(outputFileName);
+	}
+
+	public void writeStuff() throws IOException {
+		writer.write("Stuff");
+	}
+
+	@Override
+	public void finalize() throws IOException {
+		writer.close();
+	}
+}
+			]]></programlisting>
+			A kérdés pedig a következő volt: lehetséges-e, hogy valamikor a program futása során mi meghívjuk a <emphasis>writeStuff()</emphasis> metódust, viszont a fájlba mégsem kerül lementésre semmilyen szöveg? A válasz igen, abszolút. Lássuk miért!
+		</para>
+		<para>
+			Amikor fájlkezelés során megnyitunk egy fájlt írásra, létrejön egy buffer a memóriában, ami egy fix mennyiségű, az adott perzisztens tárolóra szánt, kiírandó tartalmat tud magában tartani. Ez azért működik így, hogy ne bombázzuk a háttértárat folyamatosan IO requestekkel, amik egyébként költségesek. Minden háttértárnak van egy ún. disk queue-ja, ami a bejövő IO requesteket halmozza fel, a hatékonyabb hozzáférés érdekében. Ha viszont túl sok IO requesttel terheljük meg az alkalmazásunkból az adott háttértárat, azzal telítjük a disk queue-ját, ezzel más alkalmazásokat, amik szintén erre a háttértárra várnak, gyakorlatilag teljesen ellehetetlenítünk a működéstől.
+		</para>
+		<para>
+			Mivel azonban ez a buffer, ami létrejön pl. egy <emphasis>Writer</emphasis> objektum létrehozásakor, a programunk memóriaterületében van tárolva, ezért ha a programunk valamilyen okból váratlanul leáll, a még nem diskre vitt változtatások elvesznek. Alapesetben, ha sikeresen lezártuk volna a fájl írását (a <emphasis>writer.close()</emphasis>-zal), akkor a változtatások ún. <emphasis>flush</emphasis>-ölésre kerültek volna, azaz ki lettek volna írva a háttértárra. Mivel azonban a példakódban az <emphasis>Object.finalize()</emphasis> van override-olva, ez csak akkor fut le, ha a garbage collector észreveszi, hogy nincs már több referrált BugousStuffProducer objektumpéldányuk, és eltakarítja a memóriából a hátramaradtakat.
+		</para>
+		<para>
+			Ha tudjuk, hogy nem fogjuk abúzolni a <emphasis>writeStuff()</emphasis> metódust, egy lehetséges workaround lehet egy <emphasis>writer.flush()</emphasis> sor beszúrása a metódus végére. Ezzel kikényszerítjük a flusht a write() hívás után, és garantáljuk, hogy a szöveg kiírásra kerül.
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Kind of equal</title>
+		<para>
+			A feladat a következő volt: az alábbi kódrészletben a <emphasis>String third = "...";</emphasis> sor módosításával érjük el, hogy az első három assert igaz legyen, a negyedik pedig hamis.
+			<programlisting language="java"><![CDATA[
+// Given
+String first = "...";
+String second = "...";
+String third = "...";
+
+// When
+var firstMatchesSecondWithEquals = first.equals(second);
+var firstMatchesSecondWithEqualToOperator = first == second;
+var firstMatchesThirdWithEquals = first.equals(third);
+var firstMatchesThirdWithEqualToOperator = first == third;
+			]]></programlisting>
+		</para>
+		<para>
+			A feladat a referenciák és az értékek összehasonlítását hivatott demonstrálni. Alapesetben az assertek a következő eredményeket fogják hozni: igaz, hamis, igaz, hamis; ilyen sorrendben. Ez azért van, mert az == operátor a Javaban alapértelmezett esetben a referenciákat hasonlítja össze - azaz, hogy két változó ugyanarra az objektumra mutat-e a memóriában, vagy sem. Ezzel szemben a <emphasis>.equals()</emphasis> hívása érték szerinti egyenlőséget vizsgál, két, értékében összehasonlítható objektum között.
+		</para>
+		<para>
+			Mindezeket figyelembe véve viszont, én úgy gondolom a feladat nem oldható meg. A megoldáshoz a <emphasis>String second = "...";</emphasis> sort kellene módosítanunk, méghozzá a következő módon: <emphasis>String second = first;</emphasis> Mivel ezt a feladat szabályai szerint nem tehetjük meg, a feladat véleményem szerint nem megoldható.
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Java GC</title>
+		<para>
+			A JVM fel van szerelve egy ún. garbage collector-ral (szemétgyűjtővel), ami a már nem referrált objektumok memóriából való felszabadítását hivatott automatizálni. Mostanra, a JVM-mel nem kevesebb mint 7 elérhető GC implementáció szállítódik.
+			Ezek a következők:
+			<itemizedlist>
+				<listitem>
+					<para>Serial Garbage Collector</para>
+				</listitem>
+				<listitem>
+					<para>Parallel Garbage Collector</para>
+				</listitem>
+				<listitem>
+					<para>CMS Garbage Collector</para>
+				</listitem>
+				<listitem>
+					<para>G1 Garbage Collector</para>
+				</listitem>
+				<listitem>
+					<para>Epsilon Garbage Collector</para>
+				</listitem>
+				<listitem>
+					<para>Z garbage collector</para>
+				</listitem>
+				<listitem>
+					<para>Shenandoah Garbage Collector</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			Mindegyik GC-nek megvan a saját trükkje, és az azokkal járó komplexitás is.
+		</para>
+	</section>
+</chapter>
