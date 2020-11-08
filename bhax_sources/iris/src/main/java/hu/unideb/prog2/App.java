@@ -1,9 +1,10 @@
 package hu.unideb.prog2;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class App {
     public static void main(String[] args) {
@@ -83,9 +84,27 @@ public class App {
                     medSWs.add(pwidths.length % 2 == 0 ? (pwidths[pwidths.length / 2] + pwidths[pwidths.length / 2 - 1]) / 2 : pwidths[pwidths.length / 2]);
                     medSLs.add(pwidths.length % 2 == 0 ? (pwidths[pwidths.length / 2] + pwidths[pwidths.length / 2 - 1]) / 2 : pwidths[pwidths.length / 2]);
                 });
-                irises.stream().map(elem -> elem.irisClass).distinct().forEach(irisClass -> {
-                    // System.out.println("Fajta neve: {0}", irisClass);
-                });
+
+                try (PrintWriter pw = (args.length == 2) ? new PrintWriter(new BufferedOutputStream(new FileOutputStream(args[1]))) : new PrintWriter(System.out)) {
+                    AtomicInteger counter = new AtomicInteger();
+                    irises.stream().map(elem -> elem.irisClass).distinct().forEach(irisClass -> {
+                        pw.println("Fajta neve: " + irisClass);
+                        pw.println("\tAdatpontok száma: " + irises.stream()
+                                .filter(elem -> elem.irisClass.equals(irisClass)).count());
+                        pw.println("\tAdatpont átlagok:");
+                        pw.printf("\t\tPetal width: %.3f cm\n", avgPWs.get(counter.get()));
+                        pw.printf("\t\tPetal length: %.3f cm\n", avgPLs.get(counter.get()));
+                        pw.printf("\t\tSepal width: %.3f cm\n", avgSWs.get(counter.get()));
+                        pw.printf("\t\tSepal length: %.3f cm\n", avgSLs.get(counter.get()));
+                        pw.println("\tAdatpont mediánok:");
+                        pw.printf("\t\tPetal width: %.3f cm\n", medPWs.get(counter.get()));
+                        pw.printf("\t\tPetal length: %.3f cm\n", medPLs.get(counter.get()));
+                        pw.printf("\t\tSepal width: %.3f cm\n", medSWs.get(counter.get()));
+                        pw.printf("\t\tSepal length: %.3f cm\n", medSLs.get(counter.get()));
+                        pw.println();
+                        counter.getAndIncrement();
+                    });
+                }
             }
             catch (IOException e) {
                 System.out.println("Az input fájlt nem lehetett betölteni!");
