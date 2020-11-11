@@ -1,0 +1,37 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Gödel!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>EPAM: Mátrixszorzás Stream API-val</title>
+		<para>
+			Két mátrix szorzásának megoldása funkcionális eszközökkel, for/while nélkül.
+			<programlisting language="java"><![CDATA[
+public static int[][] matmul(int[][] first, int[][] second) {
+    if (first[0].length == second.length) {
+		int[][] buffer = new int[first.length][second.length];
+        Arrays.stream(buffer).forEach(e -> {
+        
+        });
+    }
+}
+			]]></programlisting>
+		</para>
+	</section>
+	<section>
+		<title>EPAM: LinkedList vs. ArrayList</title>
+		<para>
+			A láncolt lista gyorsabb beszúrásban, mivel nem kell átméretezni az egész listának fenntartott objektumot, és/vagy átmásolni egy üres, nagyobb memóriaterületre. Az ArrayList gyorsabb hozzáférés esetén, mivel közvetlenül ahhoz az elemhez tudunk hozzáférni, amit az index alapján el kívánunk érni.
+			CODE: TODO
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Refactoring</title>
+		<para>
+			Hol a feladat?
+		</para>
+	</section>
+</chapter>

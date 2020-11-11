@@ -1,0 +1,39 @@
+Fajta neve: Iris-setosa
+	Adatpontok száma: 50
+	Adatpont átlagok:
+		Petal width: 0,244 cm
+		Petal length: 1,464 cm
+		Sepal width: 3,418 cm
+		Sepal length: 5,006 cm
+	Adatpont mediánok:
+		Petal width: 0,200 cm
+		Petal length: 0,200 cm
+		Sepal width: 0,200 cm
+		Sepal length: 0,200 cm
+
+Fajta neve: Iris-versicolor
+	Adatpontok száma: 50
+	Adatpont átlagok:
+		Petal width: 1,326 cm
+		Petal length: 4,260 cm
+		Sepal width: 2,770 cm
+		Sepal length: 5,936 cm
+	Adatpont mediánok:
+		Petal width: 1,300 cm
+		Petal length: 1,300 cm
+		Sepal width: 1,300 cm
+		Sepal length: 1,300 cm
+
+Fajta neve: Iris-virginica
+	Adatpontok száma: 50
+	Adatpont átlagok:
+		Petal width: 2,026 cm
+		Petal length: 5,552 cm
+		Sepal width: 2,974 cm
+		Sepal length: 6,588 cm
+	Adatpont mediánok:
+		Petal width: 2,000 cm
+		Petal length: 2,000 cm
+		Sepal width: 2,000 cm
+		Sepal length: 2,000 cm
+
