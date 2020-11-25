@@ -1,0 +1,37 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Lauda!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>EPAM: DI</title>
+		<para>
+			Órán megcsináltuk, dokumentáció todo soon™.
+		</para>
+	</section>
+	<section>
+		<title>EPAM: JSON szerializáció</title>
+		<para>
+			A JSON a JavaScript Object Notion rövidítése, amely egy szabvány ami a JavaScript objektumok leírásának a módját definiálja. Az évek során ez a standard az internetes kommunikáció egyik alapköve lett, mivel rendkívül könnyedén lehet JSON-ba szerializálni, és onnan deszerializálni objektumokat, típuskezelése kényelmes, jelölése rugalmas és könnyedén olvasható emberek számára is (sokkal jobban, mint pl. az XML).
+		</para>
+		<para>
+			A jelenlegi legfrissebb verzió a szabványból 2017-es, méghozzá az ISO/IEC 21778:2017 szabvány az. Ez a dokumentum leírja a JSON dokumentumok pontos szintaktikai szabályait, amelyek lehetővé teszik azok helyes feldolgozását. Fontos kiemelni, hogy míg a szintakszis kötött, a dokumentumok sémája rugalmas, így bármilyen objektumot leírhatunk velük, de a parser mindig lehet ugyan az. Ez megkülönböztetti mondjuk egy egyedi adattároló formátumtól, ami pl. csak egy bizonyos fajta objektumot tárolhat.
+		</para>
+		<para>
+			Ha már említést tettem a sémákról, fontos kiemelni továbbá azt is, hogy itt a sémavalidáció (azaz hogy egy dokumentumban leírt objektum/objektumhalmaz megfelel-e egy sémának) már nem sztenderdizált, mint mondjuk az XML esetében. Erre is vannak módszerek, de annak még nem néztem utána (TODO). További sajátossága a formátumnak, hogy az XML-el ellentétben itt kommenteket nem lehet elhelyezni - viszont vannak olyan kiegészítő szabványok (pl. JSON 5) amelyek kiterjesztik a JSON szabványt úgy, hogy lehessen.
+		</para>
+		<para>
+			Kód: TODO
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Kivételkezelés</title>
+		<para>
+			Minden esetben a megfelelő elágazás ág fut le. Ha az input null, akkor a legelső instanceof hamist ad, így a legutolsó else ág fut le, amihez a megfelelő catch block az utolsó. És igen, a finally ág mindig lefut.* (Kivételek: https://stackoverflow.com/questions/65035/does-a-finally-block-always-get-executed-in-java)
+
+			TODO: bővíteni
+		</para>
+	</section>
+</chapter>
