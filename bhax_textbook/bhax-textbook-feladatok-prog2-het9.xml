@@ -1,0 +1,83 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Helló, Calvin!</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>EPAM: Reaktív programozás</title>
+		<para>
+			Mi a szösz is az a reaktív programozás - merült fel bennem, miután utoljára egy konferencián hallottam a kifejezést, több évvel ezelőtt. Kezdjük tehát egy gyors primerrel.
+		</para>
+		<para>
+			A reaktív programozás lényege az eseményorientáltságban, az aszinkronitásban, és az ún. "back-pressure"-ben keresendő. A néhánymondatos cikk amit hirtelen találtam annyit nyilatkozott, hogy a back-pressure, pontosabban a non-blocking back pressure egy olyan mechanizmus, amivel elkerülhető, hogy túlterheljünk egy másik komponenst, ami bejövő adatokat dolgoz fel; méghozzá úgy, hogy az a feldolgozó komponens (consumer) lesz felelős az adatok elkéréséért, így kontrollja lesz a mennyiség felett, elérve hogy biztosan csak annyit adatot vegyen magához, amit kezelni tud.
+		</para>
+		<para>
+			TODO: folytatni, kidolgozni, magát a kódolós részt leimplementálni
+		</para>
+	</section>
+	<section>
+		<title>EPAM: Back to the Future</title>
+		<para>
+			Amikor először nekiláttam a feladatnak, láttam egy hármaspontot a sleep() metódus törzseként - feltételeztem hogy ki kell cserélni egy threaded sleepre. Végülis ha a metódusom megkapja paraméterként mennyit altasson az aktuális szálon, az egész már csak 1 sor, nem igaz? Dehogynem (a rudimentary kivételkezelést leszámítva, mivel checked kivételt dobhat a Thread.sleep()), úgyhogy így is tettem, a világ összes aznapra maradt naivitását felhasználva:
+			<programlisting language="java"><![CDATA[
+/** * * @param sleeptime sleep time in milliseconds */
+private static void sleep(int sleeptime) {
+    try {
+        Thread.sleep(sleeptime);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+			]]></programlisting>
+			Egyik lépés követte a másikat, észveszejtő tempóban tenyereltem a futtatásra. Ezt a kimenetet kaptam:
+			 <programlisting><![CDATA[
+Bye
+Hey, HELLO World
+Complete: Hey, HELLO World
+			]]></programlisting>
+		</para>
+		<para>
+			Eddig a pillanatig magát a kódot még el se olvastam, szóval nem gondoltam bele túl sokat - mindenesetre gyanús volt a dolog egy picit. Surely, a példakód (max. az importokat leszámítva) teljes kellene legyen, ha már az instrukciók a futtatására szólítanak fel... de a hármaspont semmiképp sem valid java syntax, hanem emberi utalás arra, hogy ide a metódus törzse jön. Tehát valami kell oda - vagy mégsem?
+		</para>
+		<para>
+			A következő probing step tehát könnyen jött: mi történne, ha kikommentelném amit sebtében gyorsan odavéstem, és üresen hagynám a metódustörzset? Elvégre a metódus visszatérési értékének a típusa void, tehát hagyhatom teljesen üresen is akár. Nos, a következő történt:
+			<programlisting><![CDATA[
+Bye
+Bye
+			]]></programlisting>
+			Mivel ugye eddig még nem olvastam bele magába a példakódba, ez engem eléggé meglepett. Rátaláltam a turpisságra, mondhatni. Innen viszont nem volt hova tovább, muszáj volt nekiállni, és felgöngyölíteni a forráskódot - és vele együtt az órán nem tárgyalt concurrencyhez használt osztályokat, amiket órán kihagytunk.
+		</para>
+	</section>
+	<section>
+		<title>EPAM: AOP</title>
+		<para>
+			Ebben a feladatban némi aspektus-orientált programozást kellett végezni, először AspectJ, majd Spring AOP segítségével. Koncepciószinten az ötletem a következő volt:
+			<itemizedlist>
+				<listitem>
+					<para>mivel mérni kell valamilyen metódusnak a futási idejét, ezért létrehozok két metódust, amelyek feltöltenek egy adott típusú listát egy átadott számú random elemmel, majd eltávolítanak belőle a teljes darabszám gyökével egyenlő mennyiségűt, random ill. egymást követő indexekről;</para>
+				</listitem>
+				<listitem>
+					<para>létrehozok egy-egy pointcutot a metódusokra;</para>
+				</listitem>
+				<listitem>
+					<para>a before()-ban elindítok egy timert;</para>
+				</listitem>
+				<listitem>
+					<para>az after()-ban leállítom az elindított timert, és kiírom az eredményt;</para>
+				</listitem>
+				<listitem>
+					<para>rinse-repeat Spring AOP-vel, reménykedve, hogy nagyjából hasonló az AspectJ-hez, amit ugye néztünk órán;</para>
+				</listitem>
+				<listitem>
+					<para>mindezek közben pedig bőszen vizsgálgatom majd a rögzített óraanyagot és a Google-t.</para>
+				</listitem>
+			</itemizedlist>
+			Sure enough, stabil tervnek tűnt. Lássuk, hogy alakult!
+		</para>
+		<para>
+			TODO
+		</para>
+	</section>
+</chapter>
