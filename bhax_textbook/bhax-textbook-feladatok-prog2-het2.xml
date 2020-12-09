@@ -8,6 +8,9 @@
 	<section>
 		<title>Liskov helyettesítés sértése</title>
 		<para>
+			<emphasis>A feladat:</emphasis> Írjunk olyan OO, leforduló Java és C++ kódcsipetet, amely megsérti a Liskov elvet! Mutassunk rá a megoldásra: jobb OO tervezés. https://arato.inf.unideb.hu/batfai.norbert/PROG2/Prog2_1.pdf (93-99 fólia) (számos példa szerepel az elv megsértésére az UDPROG  repóban, lásd pl. source/binom/Batfai-Barki/madarak/)
+		</para>
+		<para>
 			A Liskov helyettesítési szabály az ún. SOLID tervezési minta 5 alapelve közül az egyik. A mögötte rejlő gondolatmenetet bár könnyű demonstrálni, alkalmazni, és alkalmazásának hiányát észrevenni azonban nem mindig egyszerű.
 		</para>
 		<para>
@@ -18,39 +21,34 @@
 			<programlisting language="c"><![CDATA[
 // ez a T az LSP-ben
 class Madar {
-public:
-     virtual void repul() {};
+	public:
+		virtual void repul() {};
 };
 
-// ez a két osztály alkotja a "P programot" az LPS-ben
+// ez a két osztály alkotja a "P programot" az LSP-ben
 class Program {
-public:
-     void fgv ( Madar &madar ) {
-          madar.repul();
-     }
+	public:
+		void fgv (Madar &madar) {
+			madar.repul();
+		}
 };
 
 // itt jönnek az LSP-s S osztályok
-class Sas : public Madar
-{};
+class Sas : public Madar {};
 
-class Pingvin : public Madar // ezt úgy is lehet/kell olvasni, hogy a pingvin tud repülni
-{};
+class Pingvin : public Madar {}; // ezt úgy is lehet/kell olvasni, hogy a pingvin tud repülni
 
-int main ( int argc, char **argv )
-{
+int main ( int argc, char **argv ) {
      Program program;
      Madar madar;
-     program.fgv ( madar );
+     program.fgv(madar);
 
      Sas sas;
-     program.fgv ( sas );
+     program.fgv(sas);
 
      Pingvin pingvin;
-     program.fgv ( pingvin ); // sérül az LSP, mert a P::fgv röptetné a Pingvint, ami ugye lehetetlen.
-
-}
-		]]></programlisting>
+     program.fgv(pingvin); // sérül az LSP, mert a P::fgv röptetné a Pingvint, ami ugye lehetetlen.
+}		]]></programlisting>
 		Láthatjuk, hogy van egy <emphasis>Madar</emphasis> nevű osztályunk, amelyből származtatunk egy <emphasis>Pingvin</emphasis> és egy <emphasis>Sas</emphasis> alosztályt. Biológiai értelemben ez helytálló - mindkét állatfaj a madarak csoportjába tartozik. A probléma ott kezdődik viszont, amikor a Madar osztálynál definiáljuk a <emphasis>repul()</emphasis> metódust.
 		</para>
 		<para>
@@ -62,10 +60,10 @@ class Madar {
 //  void repul(){};
 };
 
-// ez a két osztály alkotja a "P programot" az LPS-ben
+// ez a két osztály alkotja a "P programot" az LSP-ben
 class Program {
 public:
-     void fgv ( Madar &madar ) {
+     void fgv(Madar &madar) {
           // madar.repul(); a madár már nem tud repülni
           // s hiába lesz a leszármazott típusoknak
           // repül metódusa, azt a Madar& madar-ra úgysem lehet hívni
@@ -99,17 +97,121 @@ int main ( int argc, char **argv )
 		]]></programlisting>
 			Mint azt láthatjuk, elszeparáltuk a röpképes madarakat a röpképtelenektől; egy extra absztrakciós szint bevezetésével kijavítottuk a leképezett kisvilágot. Most már hiába hívjuk meg a repul()-t az altípusokra, csak az a madárfajta fog repülni, ami valóban tud is.
 		</para>
+		<para>Javaban pedig egyenesen a compiler fogja nekünk megakadályozni, hogy az általunk immár átstrukturált kódunkon repul()-t hívjunk nem röpképes madarakra:
+			<programlisting language="java"><![CDATA[
+public class LSP {
+    private static class Madar { }
+
+    private static abstract class RepuloMadar extends Madar {
+        public void repul() {};
+    }
+
+    private static class Sas extends RepuloMadar {
+        @Override
+        public void repul() {
+            System.out.println("A sas felszállt!");
+        }
+    }
+
+    private static class Pingvin extends Madar { }
+
+    private static class Program {
+        public void fgv(RepuloMadar madar) {
+            madar.repul();
+        }
+    }
+
+    public static void main(String[] args) {
+        Program program = new Program();
+        Madar madar = new Madar();
+        Sas sas = new Sas();
+        Pingvin pingvin = new Pingvin();
+
+        program.fgv(madar);
+        program.fgv(sas);
+        program.fgv(pingvin);
+    }
+}
+		]]></programlisting>
+		Egy valamire való IDE a madar-ra és a pingvin-re való fgv() hívásokat piros aláhúzással meg fogja jelölni, mondván hogy az osztályukban nem szerepel repul() metódus. A behelyettesíthetőség elve tehát teljesül. Ezt az is kikényszeríti, hogy az fgv() metódus kifejezetten RepuloMadar-ból kiterjesztett osztálypéldányokat fogad csak el.
+		</para>
 	</section>
 	<section>
 		<title>Szülő-gyerek</title>
 		<para>
-			Ez a feladat a statikus és a dinamikus kötés közti különbségről szól. Statikus kötésről akkor beszélünk, amikor a compiler fordítási időben resolve-olni tudja, melyik osztály metódusa lesz futtatva, hiszen ilyenkor metódus overloadingról beszélünk, nem pedig overridingról. Ilyenkor az osztályhierarchiában a minél "korábbi", minél inkább szülőosztály metódusa kerül kiválasztásra. Egyéb esetben metódus overridingról van szó, amit @Override annotációval is jelölni szokás. Ilyenkor mind a superclass mind a subclass metódusa nem-statikus, ilyenkor a metódus rezolúció tehát futásidőben történik meg. Ezt kései vagy dinamikus kötésnek hívjuk. Ekkor az objektumreferencia határozza meg, melyik metódus lesz lefuttatva, nem pedig az objektumtípus. Példákért lásd: <link xlink:href="https://www.geeksforgeeks.org/can-we-overload-or-override-static-methods-in-java/">https://www.geeksforgeeks.org/can-we-overload-or-override-static-methods-in-java/</link>
+			<emphasis>A feladat:</emphasis> Írjunk Szülő-gyerek Java és C++ osztálydefiníciót, amelyben demonstrálni tudjuk, hogy az ősön keresztül csak az ős üzenetei küldhetőek! Lásd fóliák! https://arato.inf.unideb.hu/batfai.norbert/PROG2/Prog2_1.pdf (98.fólia)
 		</para>
-	</section>
-	<section>
-		<title>Ciklomatikus komplexitás</title>
-		<!-- https://dzone.com/articles/measuring-code-complexity -->
-		<para></para>
+		<para>
+			Nos, miről is van itt szó? Ahogy a hivatkozott dián is látszik, a dinamikus és statikus kötésekről, valamint a virtuális metódusokról / függvényekről és a polimorfizmusról. Kezdjük magának a feladatnak a lekódolásával, először Javaban. A kód eredetileg a következő oldalon lévő static binding példakód egy, a feladat szövegezéséhez igazított változata: <link xlink:href="https://www.geeksforgeeks.org/static-vs-dynamic-binding-in-java/">https://www.geeksforgeeks.org/static-vs-dynamic-binding-in-java/</link>
+			<programlisting language="java"><![CDATA[
+public class NewClass { 
+    public static class Szulo { 
+        static void print() 
+        { 
+            System.out.println("print from Szulo."); 
+        } 
+    } 
+  
+    public static class Gyerek extends Szulo { 
+        static void print() 
+        { 
+            System.out.println("print from Gyerek."); 
+        } 
+    } 
+  
+    public static void main(String[] args) 
+    { 
+        Szulo A = new Szulo(); 
+        Szulo B = new Gyerek(); 
+        A.print(); 
+        B.print(); 
+    } 
+}
+		]]></programlisting>
+		</para>
+		<para>
+			Mit gondolunk, mi lesz a kimenet? Nos, talán kevéssé meglepő módon az, amit a feladat kiírása vár:
+			<programlisting><![CDATA[
+print from Szulo.
+print from Szulo.
+		]]></programlisting>
+			Miért is van ez? Bár a diasor (hibásan) azt írja, hogy a Java nyelvben mindig dinamikus a kötés, a static, final, illetve private kulcsszavakkal ellátott mezők és metódusok mind statikusan kötöttek. Ez azt jelenti, hogy a fordító fordításidőben oldja fel, hogy pontosan melyik mezőre vagy metódusra hivatkozik a kód, a típusinformációk (a kódban meghatározott osztályok) mentén. Ahogy a példakódban is látszik, mind az A, mind a B objektum típusának a Szulo osztály van megadva, így a Szulo osztály print() metódusa lesz belefordítva mindkét hívásnál a bájtkódba, mivel fordításidőben az lesz (statikusan) feloldva. Fontos megjegyezni, hogy a metódus overloadolás szintén statikusan kerül feloldásra, fordításidőben, a metódusok szignatúrája mentén.
+		</para>
+		<para>
+			Ennél is fontosabb észben tartani viszont, hogy a Java nyelvben a mezők és a metódusok alapból <emphasis>virtuálisak</emphasis>, míg a C++ nyelvben ezt külön kulcsszóval kell specifikálni, ahogy az a diasoron is látszik (a virtual kulcsszóval). Emellett az is igaz, hogy például override-olás során mindig dinamikus kötés történik. Ergó, ha a kódunk így nézne ki:
+			<programlisting language="java"><![CDATA[
+public class NewClass { 
+    public static class Szulo { 
+        void print() 
+        { 
+            System.out.println("print from Szulo."); 
+        } 
+    } 
+  
+    public static class Gyerek extends Szulo { 
+        @Override
+        void print() 
+        { 
+            System.out.println("print from Gyerek."); 
+        } 
+    } 
+  
+    public static void main(String[] args) 
+    { 
+        Szulo A = new Szulo(); 
+        Szulo B = new Gyerek(); 
+        A.print(); 
+        B.print(); 
+    } 
+}
+		]]></programlisting>
+		... akkor a kimenet már rögtön megváltozna:
+		<programlisting><![CDATA[
+print from Szulo.
+print from Gyerek.
+		]]></programlisting>
+		Ezzel demonstráltuk is a dinamikus kötést, és a dynamic dispatchet. További fontos apróság, hogy természetesen a korai, fordításidejű kötésfeloldás optimálisabb binárist fog eredményezni. 
+		</para>
 	</section>
 	<section>
 		<title>EPAM: Interfész evolúció Java-ban</title>
@@ -135,13 +237,13 @@ int main ( int argc, char **argv )
 	<section>
 		<title>EPAM: Liskov-féle helyettesíthetőség elve, öröklődés</title>
 		<para>
-			A Liskov-behelyettesíthetőség (Liskov Substitution Principle) a jó objektum orientált design egyik alapköve. Ha az osztályhierarchia amit megalkottunk olyan, hogy az általunk kialakított osztályok példányosításakor bármilyen őstípust biztonsággal kicserélhetünk egy altípusra a működés megváltozása nélkül, akkor teljesül rá a Liskov-behelyettesíthetőség elve.
+			A Liskov-behelyettesíthetőség (Liskov Substitution Principle) a jó objektum orientált design egyik alapköve. Ha az osztályhierarchia amit megalkottunk olyan, hogy az általunk kialakított osztályok példányosításakor bármilyen őstípust biztonsággal kicserélhetünk egy altípusra a működés megváltozása nélkül (pontosabban az ősosztály, az altípusnál általánosabb contractjának megsértése nélkül), akkor teljesül rá a Liskov-behelyettesíthetőség elve.
 		</para>
 		<para>
-			Az eredeti feladatkiírás a következő volt: Adott az alábbi osztály hierarchia: "class Vehicle", "class Car extends Vehicle", "class Supercar extends Car". Mindegyik osztály konstruktorában történik egy kiíratás, valamint a Vehicle osztályban szereplő <emphasis>start()</emphasis> metódus mindegyik alosztályban felül van definiálva. Mi történik ezen (lejjebb látható) kódok futtatása esetén, és miért?
+			<emphasis>A feladat:</emphasis> Adott az alábbi osztály hierarchia: "class Vehicle", "class Car extends Vehicle", "class Supercar extends Car". Mindegyik osztály konstruktorában történik egy kiíratás, valamint a Vehicle osztályban szereplő <emphasis>start()</emphasis> metódus mindegyik alosztályban felül van definiálva. Mi történik ezen (lejjebb látható) kódok futtatása esetén, és miért?
 		</para>
 		<para>
-			Kezdjük először is a konstruktorokban való kiíratással. Amikor egy alosztályt példányosítunk, az összes ősosztály konstruktora végighívódik láncszerűen, a hierarchia tetejéről indulva. A példában említett osztályok esetén ezt azt jelentené, hogy a Supercar osztály példányosításakor, legelőször a Vehicle osztály konstruktra futna le, amit követne a Car osztályé, végül pedig a Supercar osztályé. Ez azért történik így, mert így az ősosztályok alapértékei beállításra kerülnek, pontosan úgy, ahogy erre számítanánk.
+			Kezdjük először is a konstruktorokban való kiíratással. Amikor egy alosztályt példányosítunk, az összes ősosztály konstruktora végighívódik láncszerűen, a hierarchia tetejéről indulva. A példában említett osztályok esetén ezt azt jelentené, hogy a Supercar osztály példányosításakor, legelőször a Vehicle osztály konstruktra futna le, amit követne a Car osztályé, végül pedig a Supercar osztályé. Ez azért történik így, mert így az ősosztályok alapértékei beállításra kerülnek, pontosan úgy, ahogy erre számítanánk. Eclipse IDE esetén ez még egyértelműbb, mivel ha automatikusan generáltatja vele az ember a konstruktort, minden alkalommal elhelyezi a super() hívást expliciten, ezzel emlékeztetve minket, hogy itt előtte az ősosztály konstruktora meghívásra kerül.
 		</para>
 		<para>
 			Folytassuk akkor a kóddal! A következő code snippet volt a feladat utasításába helyezve:
@@ -165,7 +267,46 @@ Vehicle firstVehicle = new Supercar();
 firstVehicle.start();
 System.out.println(firstVehicle instanceof Car);
 		]]></programlisting>
-			Itt mindenekelőtt létrehozunk egy járművet, melynek a típusa Supercar lesz, a dinamikus kötésnek köszönhetően.
+			Itt mindenekelőtt létrehozunk egy járművet, melynek a típusa Supercar lesz, a dinamikus kötésnek köszönhetően. Onnan tudjuk, hogy a kötés dinamikus, mivel override-olni csak nem-statikus, nem-final és nem-private metódusokat lehet, és a feladat expliciten jelzi, hogy a Vehicle start() metódusa minden gyermekosztályban override-olásra került. A <emphasis>firstVehicle.start()</emphasis> tehát a Supercarban lévő start metódust fogja meghívni.
+		</para>
+		<para>
+			Ennél talán izgalmasabb az instanceof. Az instanceof kulcsszóval vizsgálni tudjuk, hogy van-e egy változó és egy osztály között egy "az x változó y-hoz köthető" jellegű kapcsolat. Ez teljesül, ha az adott objektum típusa, és az összehasonlított osztály megegyeznek, ha az összehasonlított osztály gyermekosztálya az objektum típusát adó osztálynak (ez lesz most a miénk), vagy ha az összehasonlításban egy interfészt helyezünk el egy osztály helyett, és azt az objektum típusát adó osztálya implementálja. Ha véletlenül null referenciának akarnánk ezt a kulcsszót használni, nem dobódik null pointer exception, hanem egyszerűen csak hamist kapunk vissza.
+		</para>
+		<para>
+			A mi esetünkben itt most igaz lesz, mivel a firstVehicle egy Supercar lesz, ami leszármazottja a Car osztálynak.
+		</para>
+		<para>
+			Nézzük a második blokkot!
+			<programlisting language="java"><![CDATA[
+Car secondVehicle = (Car) firstVehicle;
+secondVehicle.start();
+System.out.println(secondVehicle instanceof Supercar);
+		]]></programlisting>
+			Ez már sokkal izgalmasabb! Az első sorban itt egy ún. explicit upcasting történik; egy gyermekosztály-példányt expliciten típuskényszerítünk egy szülőosztály-példányreferenciává. Ez sok komplex szó, so let's unpack. Látható, hogy először is Car típusúvá kényszerítjük a firstVehicle objektumot... vagy mégsem? Nos nem, ugyanis mi igazából csak a referenciának a típusát változtatjuk meg - a háttérben a firstVehicle továbbra is egy Supercar objektumpéldány marad. Számunkra ez azt jelenti, hogy a dinamikusan kötött, Supercar változatú start() lesz az, amit mi később meg fogunk hívni még mindig - illetve hogy az instanceof igazzal tér majd vissza.
+		</para>
+		<para>
+			Az upcasting egy biztonságos művelet, mivel a castolás után már csak általánosabb, az alosztály által biztosan implementált funkcionalitáshoz tudunk hozzáférni (restrictive). Upcastolni lehet implicit és explicit módon is, azaz a (Car) kitételére igazából nem volt szükség.
+		</para>
+		<para>
+			Ugyanez nem igaz a downcastingra viszont (<link xlink:href="https://en.wikipedia.org/wiki/Downcasting">https://en.wikipedia.org/wiki/Downcasting</link>). Downcastolni explicit módon kell, illetve fontos, hogy előtte instanceof segítségével leellenőrízzük, hogy megtehetjük-e ezt egyáltalán. Az instanceof check elhagyása futásidőben ClassCastException-t eredményezhet. Downcastolni csak akkor lehet, ha tudjuk, hogy az adott magasabb szinten lévő referencia az általunk kívánt altípusú objektumot rejti (például ha tudjuk, hogy Supercarról van szó, a secondVehicle-t bizalommal downcastolhatjuk Supercar referenciává).
+		</para>
+		<para>
+			Jöjjön hát végül a harmadik blokk!
+			<programlisting language="java"><![CDATA[
+Supercar thirdVehicle = new Vehicle();
+thirdVehicle.start();
+		]]></programlisting>
+			Ez elgondolkoztatott, sőt, megijesztett - amíg egy gyors példaprojektet összedobva meg nem láttam, hogy le se fordul :). És mivel már IDE-ben jártam (IntelliJ), láthattam ahogy a fentebb tett állításaimat a static analyzer pontról pontra igazolja is - a két instanceof egyértelműen igaz lesz, valamint az explicit upcast is felesleges, megy az implicit is. Amit itt a harmadik blokkban tenni akartunk, egyszerűen nem működhet, mivel a Vehicle osztályból számos olyan funkcionalitás hiányozhat, amit a sokkal specifikusabb Supercar osztály leimplementál. Emiatt nem kezelhető egy Vehicle objektum Supercar referenciaként... vagy mégis?
+			<programlisting language="java"><![CDATA[
+Supercar thirdVehicle = (Supercar) new Vehicle();
+thirdVehicle.start();
+		]]></programlisting>
+			Ha ezt tesszük, már le fog fordulni a programunk - cserébe futásidejű ClassCastException lesz a jutalmunk, méghozzá a fentebb említett downcastolás feltétele miatt. Nézzük meg, mit ad az instanceof akkor, ha létrehozunk egy Vehicle-t egy külön változóba, és megnézzük, hogy milyen relationshipben van a Supercarral!
+			<programlisting language="java"><![CDATA[
+Vehicle fourthVehicle = new Vehicle();
+System.out.println(fourthVehicle instanceof Supercar);
+		]]></programlisting>
+			Az eredmény false lesz, mivel nincs ilyen irányú hierarchikus kapcsolat a kettő között.
 		</para>
 	</section>
 </chapter>

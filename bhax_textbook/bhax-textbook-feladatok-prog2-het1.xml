@@ -48,7 +48,7 @@ public class PolárGenerátor {
 		</para>
 		<para>
 			A C++ verzió is rendkívül hasonló: (forrás: <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/polargen/">https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/polargen/</link>)
-			<programlisting language="cpp"><![CDATA[
+			<programlisting language="c"><![CDATA[
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
