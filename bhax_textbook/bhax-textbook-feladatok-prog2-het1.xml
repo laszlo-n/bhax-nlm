@@ -8,35 +8,94 @@
 	<section>
 		<title>OO szemlélet</title>
 		<para>
-			<emphasis>A feladat:</emphasis> Implementáljuk a polátranszformációs alapú randomgenerátor algoritmust Java nyelven. Vizsgáljuk meg mi a különbség a mi implementációnk és a hivatalos OpenJDK-ban lévő implementáció között objektum-orientáltság szempontból! Kiindulási alapként használható a következő diasor: <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf">https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf</link> (16-22. fólia).
+			<emphasis>A feladat:</emphasis> A módosított polártranszformációs normális generátor beprogramozása Java nyelven. Mutassunk rá, hogy a mi természetes saját megoldásunk (az algoritmus egyszerre két normálist állít elő, kell egy példánytag, amely a nem visszaadottat tárolja és egy logikai tag, hogy van e tárolt vagy futtatni kell az algot.) és az OpenJDK, Or acle JDK ban a Sun által adott OO szervezés ua.! Lásd még fóliák! Ismétlés: <link xlink:href="https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf">https://arato.inf.unideb.hu/batfai.norbert/UDPROG/deprecated/Prog1_5.pdf</link> (16-22. fólia). Ugyanezt írjuk meg C++ nyelven is! (lásd még UDPROG repó: source/labor/polargen)
 		</para>
 		<para>
 			Ahogy a mellékelt diasori segédletből is látható, viszonylag nincs bonyolult dolgunk, alapvető OO koncepciókat kell felhasználnunk csak. Először is létre kell hoznunk egy osztályt &quot;<emphasis>PolárGenerátor</emphasis>&quot; néven. Osztályok segítségével tudjuk leírni, hogyan is épül fel egy adott típusú objektum: milyen fieldjei és metódusai lesznek. A mi <emphasis>PolárGenerátor</emphasis> objektumaink márpedig viszonylag triviálisak lesznek. Lesz két fieldjük, egy logikai &quot;<emphasis>nincsTárolt</emphasis>&quot; változó annak eltárolására, hogy van-e érték a &quot;tarsolyunkban&quot;, és egy dupla-pontosságú lebegőpontos szám, a &quot;<emphasis>tárolt</emphasis>&quot;, ami ezt az értéket fogja tartalmazni; valamint lesz egy metódusuk, ami a következő értékeket fogja mindig generálni (&quot;következő()&quot;). Az osztályunknak emellett lesz egy konstruktora is, ami ugye le fog lefutni minden egyes objektumpéldány létrehozásakor.
 			<programlisting language="java"><![CDATA[
 public class PolárGenerátor {
-
-	// a két fieldünk
-	boolean nincsTárolt;
+	boolean nincsTárolt = true;
 	double tárolt;
 
-	// a konstrukor
 	public PolárGenerátor() {
 		nincsTárolt = true;
 	}
 
-	// a következő() metódus (pontosabban csak a szignatúrája)
-	public double következő() {}
+	public double következő() {
+		if (nincsTárolt) {
+            double u1, u2, v1, v2, w;
+            do {
+                u1 = Math.random();
+                u2 = Math.random();
+                v1 = 2 * u1 - 1;
+                v2 = 2 * u2 - 1;
+                w = v1 * v1 + v2 * v2;
+            } while (w > 1);
+            double r = Math.sqrt((-2 * Math.log(w)) / w);
+            tárolt = r * v2;
+            nincsTárolt = !nincsTárolt;
+            return r * v1;
+        } else {
+            nincsTárolt = !nincsTárolt;
+            return tárolt;
+        }
+	}
 }
 			]]></programlisting>
 		</para>
 		<para>
 			Ahogy az a <link xlink:href="http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583">http://hg.openjdk.java.net/jdk/jdk13/file/0368f3a073a9/src/java.base/share/classes/java/util/Random.java#l583</link> oldalon is látható, a hivatalos implementáció gyakorlatilag carbon copy-ja a miénknek, pedig ez már a 13-as JDK. Érdemes lehet figyelni a linkelt sort megelőző kommentekre is, jelölik hogy a synchronized kulcsszó nyomán ugye a metódus thread-safe (több szálról random számot generálva sem korruptálják a shared state-t a lefutó metódusok), illetve hogy a StrictMath osztály van használva, a precízió biztosítása érdekében.
 		</para>
+		<para>
+			A C++ verzió is rendkívül hasonló: (forrás: <link xlink:href="https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/polargen/">https://sourceforge.net/p/udprog/code/ci/master/tree/source/labor/polargen/</link>)
+			<programlisting language="cpp"><![CDATA[
+#include <cstdlib>
+#include <cmath>
+#include <ctime>
+
+class PolarGen
+{
+	public:
+		PolarGen () {
+			nincsTarolt = true;
+			std::srand(std::time(NULL));
+		}
+
+		~PolarGen () {}
+		
+		double kovetkezo () {
+			if (nincsTarolt) {
+				double u1, u2, v1, v2, w;
+				do {
+					u1 = std::rand() / (RAND_MAX + 1.0);
+					u2 = std::rand() / (RAND_MAX + 1.0);
+					v1 = 2 * u1 - 1;
+					v2 = 2 * u2 - 1;
+					w = v1 * v1 + v2 * v2;
+				} while (w > 1);
+
+				double r = std::sqrt((-2 * std::log(w)) / w);
+
+				tarolt = r * v2;
+				nincsTarolt = !nincsTarolt;
+
+				return r * v1;
+			} else {
+				nincsTarolt = !nincsTarolt;
+				return tarolt;
+			}
+		}
+
+	private:
+		bool nincsTarolt;
+		double tarolt;
+};			]]></programlisting>
+		</para>
 	</section>
 	<section>
 		<title>Homokozó</title>
 		<para>
-			<emphasis>A feladat:</emphasis> A C++-os LZW bináris fás kódot portoljuk át Javára és elemezzük a különbségeket. Implementáljuk, hogy Java Servletek segítségével legyenek kiíratva a keletkező fák.
+			<emphasis>A feladat:</emphasis> Írjuk át az első védési programot (LZW binfa) C++ nyelvről Java nyelvre, ugyanúgy működjön! Mutassunk rá, hogy gyakorlatilag a pointereket és referenciákat kell kiirtani és minden máris működik (erre utal a feladat neve, hogy Javaban minden referencia, nincs választás, hogy mondjuk egy attribútum pointer, referencia vagy tagként tartalmazott legyen).Miután már áttettük Java nyelvre, tegyük be egy Java Servletbe és a böngészőből GET es kéréssel (például a böngésző címsorából) kapja meg azt a mintát, amelynek kiszámolja az LZW binfáját!
 		</para>
 		<para>
 			Némi refresherként, az eredeti C++ kód ugyanebből a könyvből:
@@ -300,11 +359,14 @@ public class BinaryTree {
 }
 ]]></programlisting>
 		</para>
+		<para>
+			Servletet nem csináltam hozzá.
+		</para>
 	</section>
 	<section>
 		<title>Yoda</title>
 		<para>
-			<emphasis>A feladat:</emphasis> Írjunk egy olyan programot, ami NullPointerException-nel leáll, ha nem az ún. Yoda-stílusban írunk meg egy feltételt benne. (Segítség: <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions)</link>)
+			<emphasis>A feladat:</emphasis> Írjunk olyan Java programot, ami java.lang.NullPointerEx-el leáll, ha nem követjük a Yoda conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions</link>)
 		</para>
 		<para>
 			Ahogy a hivatkozott Wikipédia cikkben is olvasható, a Yoda-feltételek a megnevezett Star Wars szereplő filmbéli beszédstílusát hivatottak felidézni. Lényege, hogy nem a változótartalomhoz hasonlítjuk a konstansunk, hanem a konstanshoz hasonlítjuk a változónk. Ezt két problémaforrás elkerülésére használják.
@@ -335,19 +397,22 @@ if ("foobar".equals(myString)) { } // ez viszont nem!
 	<section>
 		<title>EPAM: Java Object metódusok</title>
 		<para>
-			A Java nyelvben, és az objektum-orientált nyelvekben úgy általánosságban, minden osztály egy bizonyos ősosztály, az <emphasis>Object</emphasis> osztály egy kiterjesztése. Ez azt jelenti, hogy minden metódus ami az Object osztályban példányszinten definiálva van, meghívható lesz minden objektumra. Előfordulha azonban, hogy mi ezen a közös funkcionalitáson változtatni szeretnénk - Javaban erre természetesen lehetőségünk is van. Nézzük milyen főbb metódusokat ad nekünk az <emphasis>Object</emphasis> osztály, és mikor érdemes őket felüldefiniálni (<emphasis>override</emphasis>-olni)!
+			<emphasis>A feladat:</emphasis> Mutasd be a Java Object metódusait és mutass rá mely metódusokat érdemes egy saját osztályunkban felüldefiniálni és miért. (Lásd még Object class forráskódja)
+		</para>
+		<para>
+			A Java nyelvben, és az objektum-orientált nyelvekben úgy általánosságban, minden osztály egy bizonyos ősosztály, az <emphasis>Object</emphasis> osztály egy kiterjesztése. Ez azt jelenti, hogy minden metódus ami az Object osztályban példányszinten definiálva van, meghívható lesz minden objektumra. Előfordulhat azonban, hogy mi ezen a közös funkcionalitáson változtatni szeretnénk - Javaban erre természetesen lehetőségünk is van. Nézzük milyen főbb metódusokat ad nekünk az <emphasis>Object</emphasis> osztály, és mikor érdemes őket felüldefiniálni (<emphasis>override</emphasis>-olni)!
 		</para>
 		<para>
 			<emphasis>equals():</emphasis> Az <emphasis>equals()</emphasis> metódus érték szerinti összehasonlításra használatos. Gyakorlatilag mindig érdemes felüldefiniálni, ezzel tudjuk elérni, hogy például csak szelektíven, néhány mezőt figyelembe véve állapítsunk meg egyenlőséget két objektumpéldányunk között. Fontos, hogy ha ezt felüldefiniáljuk, és valóban szelektíven csak néhány mezőt használunk, akkor muszáj lesz a <emphasis>hashCode()</emphasis> metódust is felüldefiniálnunk, hiszen <emphasis>contract</emphasis> szerint ha két objektumnak egyező a hash-e, az <emphasis>equals()</emphasis> is igazt kell visszaadjon az összehasonlításukkor. És ha már <emphasis>hashCode()</emphasis>...
 		</para>
 		<para>
-			<emphasis>hashCode():</emphasis> A <emphasis>hashCode()</emphasis> függvény visszaad egy számot, ami egyedien jellemzi az adott objektumpéldányt. Ez sok alkalommal lehet hasznos, például különböző hash table-ök létrehozásánál és objektumok összehasonlításánál. Lehet például úgy újradefiniálni az <emphasis>equals()</emphasis>-t, hogy meghívja a <emphasis>hashCode()</emphasis>-ot és összehasonlítja az értéküket, így csak egy helyen kell specifikálnunk, hogy milyen field-ek számítanak nekünk az objektumok egyenlőségének megállapításakor.
+			<emphasis>hashCode():</emphasis> A <emphasis>hashCode()</emphasis> függvény visszaad egy számot, ami egyedien jellemzi az adott objektumpéldányt. Ez sok alkalommal lehet hasznos, például különböző hash table-ök létrehozásánál és objektumok összehasonlításánál. Lehet például úgy újradefiniálni az <emphasis>equals()</emphasis>-t, hogy meghívja a <emphasis>hashCode()</emphasis>-ot és összehasonlítja az értéküket, így csak egy helyen kell specifikálnunk, hogy milyen field-ek számítanak nekünk az objektumok egyenlőségének megállapításakor. Fontos észben tartani, hogy mint minden hash, collisionök itt is előállhatnak, tehát előfordulhat, hogy bár két objektum hashCode-ja egyenlő, a két objektum tartalmilag mégis eltér. Épp emiatt az equals() és a hashCode() funkcionálisan nem felcserélhető.
 		</para>
 		<para>
 			<emphasis>toString():</emphasis> Azt befolyásolja, hogy egy objektum hogyan alakítható sztringgé, miként szerializálható szövegként. Ezt akkor hasznos felüldefiniálni, ha log kimenetbe szeretnénk olvashatóbb outputot helyezni.
 		</para>
 		<para>
-			<emphasis>clone():</emphasis> A <emphasis>clone()</emphasis> egy értékalapú másolatot hoz létre az adott objektumpéldányból, ezzel lehetővé tévve, hogy ne eregessünk mindenfelé referenciákat egy adott objektumról. Rendkívül hasznos tud lenni, mivel értékalapú másolatok használatával elkerülhetjük a véletlen side-effecteket, és átláthatóbban tarthatjuk a kódot.
+			<emphasis>clone():</emphasis> A <emphasis>clone()</emphasis> egy értékalapú másolatot hoz létre az adott objektumpéldányból, ezzel lehetővé tévve, hogy ne eregessünk mindenfelé referenciákat egy adott objektumról. Rendkívül hasznos tud lenni, mivel értékalapú másolatok használatával elkerülhetjük a véletlen side-effecteket, és átláthatóbban tarthatjuk a kódot. Fontos, hogy ha az osztályunk nem implementálja a Cloneable interfészt, akkor az Object.clone() meghívása az osztály egy példányára CloneNotSupportedException-t fog produkálni. Szintén fontos viszont, hogy maga a Cloneable interfész nem írja elő a clone() metódus létezését; ha nem definiáljuk felül az Object.clone()-t, akkor alapból egy shallow copy fog készülni az objektumról. Éppen ezért a dokumentáció is ajánlja, hogy minden osztály ami implementálja a Cloneable interfészt, definiálja felül az Object clone() függvényét, hogy mélymásolat készülhessen az objektumokról. Az Object osztály nem implementálja a Cloneable interfészt viszont, nyers Object objektumokat így nem lehet "klónozni".
 		</para>
 	</section>
 </chapter>
