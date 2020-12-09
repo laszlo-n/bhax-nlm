@@ -6,22 +6,17 @@
 		</keywordset>
 	</info>
 	<section>
-		<title>Forward engineering UML osztálydiagram</title>
-		<para>
-			Ld. későbbi feladat lejjebb.
-		</para>
-	</section>
-	<section>
 		<title>EPAM: Neptun tantárgyfelvétel modellezése UML-ben</title>
 		<para>
 			<informalfigure>
 				<graphic fileref="images/fc2bf2ff.png"></graphic>
 			</informalfigure>
+			Itt azóta történt annyi változás, hogy a Subject-Lecturere kompozíció megszűnt.
 		</para>
 	</section>
 	<section>
 		<title>EPAM: Neptun tantárgyfelvétel UML diagram implementálása</title>
-		<para>kód fel lesz töltve a bhax-sources mappába</para>
+		<para>A kódot a bhax-sources mappába tettem targyfelv néven.</para>
 	</section>
 	<section>
 		<title>EPAM: OO modellezés</title>
@@ -33,6 +28,32 @@
 		</para>
 		<para>
 			<emphasis>DRY:</emphasis> Rövidítése a "don't repeat yourself"-nek, azaz hogy "ne ismételd magad". Célja a kód duplikáció minimalizálása, és az ezek miatt kialakuló bugok elkerülése.
+		</para>
+		<para>
+			<emphasis>SOLID:</emphasis> A SOLID egy mozaikszó, ami a következőket öleli magába: Single responsibility principle, Open/closed principle, Liskov substitution principle, Interface segregation principle, Dependency inversion principle. Ebből az LSP-t már tárgyaltam ebben a könyvben, úgyhogy nézzük a többit!
+			<itemizedlist>
+				<listitem>
+					<para><emphasis>Single responsibility principle:</emphasis>Ahogy ezt a félév során sokszor tárgyaltuk, törekedni kell a metódusok, osztályok, komponensek, stb. felelőségének minimálisra limitálására, lehetőleg egyre. Ezzel modulárisabb, és könnyebben kezelhető lesz a kód, illetve csökken a dependenciák mélysége és számossága.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis>Open/closed principle:</emphasis>Az osztályokat, modulokat ki lehessen terjeszteni, de beléjük módosítani ne lehessen.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis>LSP:</emphasis>Lásd a korábbi fejezet, de amúgy az általánosabb osztályok specifikusabbal behelyetthetőségről szól.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis>Interfész-elválasztási elv:</emphasis>Törekedni kell arra, hogy egy adott interfész vagy modul consume-olásához ne kelljen olyan interfésszeket ill. modulokat behúznia a felhasználónak, amire nincs igazából szüksége.</para>
+				</listitem>
+				<listitem>
+					<para><emphasis>Függőség-megfordítási elv:</emphasis>Mind a magas és alacsony szintű modulok absztrakcióktól kell függjenek, nem egymástól, és az absztrakciók ne függjenek implementációktól.</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			<emphasis>TellDontAsk:</emphasis> Ez a principle arra szólít fel, hogy ahelyett hogy arra kérnénk objektumokat hogy adatot adjanak nekünk vissza, inkább kérjük meg őket arra, hogy csináljanak velük valamit. Ez elősegíti az OO gondolkodást és az adat-logika couplingját, practically antitézist állítva az anemikus megközelítésnek.
+		</para>
+		<para>
+			<emphasis>Anemic domain model:</emphasis> Ez a megközelítés minimalizálja a business logikát az objektumokban, itt beanekre, daokra kell gondolni.
 		</para>
 	</section>
 </chapter>
