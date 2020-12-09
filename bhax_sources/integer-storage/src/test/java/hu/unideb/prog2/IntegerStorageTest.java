@@ -121,4 +121,13 @@ public class IntegerStorageTest {
         assertTrue(result);
     }
     //endregion
+
+    @Test
+    public void testSortShouldReturnCorrectOrderWhenOddNumberOfValuesPassed() {
+        underTest = new IntegerStorage(new int[]{2, 3, 1, 4});
+
+        underTest.sort();
+
+        assertArrayEquals(underTest.getIntStore(), new int[]{1, 2, 3, 4});
+    }
 }

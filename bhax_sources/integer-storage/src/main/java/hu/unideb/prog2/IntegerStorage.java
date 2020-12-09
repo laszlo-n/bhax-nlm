@@ -39,20 +39,20 @@ public class IntegerStorage {
     }
 
     public int[] sort() {
-        if (!sorted) {
-            for (int i = 0; i < lastRealIndex; i++) {
-                for (int j = 1; j <= lastRealIndex; j++) {
-                    // növekvő sorrendet kényszerít ki
-                    if (intStore[j] > intStore[i]) {
-                        // csere
-                        intStore[i] += intStore[j];
-                        intStore[j] = intStore[i] - intStore[j];
-                        intStore[i] -= intStore[j];
-                    }
+        boolean swapped = false;
+        int rightLimit = lastRealIndex;
+        do {
+            swapped = false;
+            for (int i = 0; i < rightLimit; i++) {
+                if (intStore[i] > intStore[i + 1]) {
+                    int temp = intStore[i];
+                    intStore[i] = intStore[i + 1];
+                    intStore[i + 1] = temp;
+                    swapped = true;
                 }
             }
-            this.sorted = true;
-        }
+            rightLimit--;
+        } while(swapped);
         return intStore.clone();
     }
 
@@ -61,26 +61,26 @@ public class IntegerStorage {
         this.sort();
 
         // a határelemekeet és a középpontot beállítjuk
-        int L = 0;
-        int R = lastRealIndex;
-        int M = (R + L) / 2;
+        int leftSearchBoundary = 0;
+        int rightSearchBoundary = lastRealIndex;
+        int searchedRegionCenter = (rightSearchBoundary + leftSearchBoundary) / 2;
 
         // lecsekkoljuk a határokat
-        if (R < 0 ) return false;
-        if (intStore[L] == val || intStore[R] == val) return true;
-        if (L == R) return false;
+        if (rightSearchBoundary < 0 ) return false;
+        if (intStore[leftSearchBoundary] == val || intStore[rightSearchBoundary] == val) return true;
+        if (leftSearchBoundary == rightSearchBoundary) return false;
 
         // amíg a midpoint nem egyezik a keresettel, vagy
         // amíg a két szélső elem nem egymás melletti
-        while (intStore[M] != val || Math.max(L, R) - Math.min(L, R) > 1) {
-            if (val < intStore[M]) R = M;
-            else L = M;
-            M = (R + L) / 2;
+        while (intStore[searchedRegionCenter] != val || Math.max(leftSearchBoundary, rightSearchBoundary) - Math.min(leftSearchBoundary, rightSearchBoundary) > 1) {
+            if (val < intStore[searchedRegionCenter]) rightSearchBoundary = searchedRegionCenter;
+            else leftSearchBoundary = searchedRegionCenter;
+            searchedRegionCenter = (rightSearchBoundary + leftSearchBoundary) / 2;
         }
 
         // bármelyik condition miatt állt is le a ciklus, ez
         // a kifejezés a helyes választ fogja most itt adni
-        return intStore[M] == val;
+        return intStore[searchedRegionCenter] == val;
     }
 
     @Override
