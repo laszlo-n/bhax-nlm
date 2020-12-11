@@ -8,7 +8,7 @@
 	<section>
 		<title>EPAM: XML feldolgozás</title>
 		<para>
-			Ld. a források közt az xml-to-svg mappát. Writeup soon™.
+			A kódot a book-sources mappába tettem xml-to-svg néven.
 		</para>
 	</section>
 	<section>
@@ -17,7 +17,7 @@
 			A feladat itt az volt, hogy olvassunk be egy tetszőleges formátumú képet, majd nyomtassuk ki a konzolra ascii artként. Ehhez ugye először át kell alakítsuk majd grayscale-é a bemeneti képet, mivel a karakterek csak egyféle értéket tudnak majd leképezni. Az egyszerűség kedvéért, én 1:1 mappinget használtam, azaz 1 pixel 1 karakter lesz, a karaktert magát pedig majd a pixel grayscale értéke határozza majd meg. Általában az ASCII artok fixed karakterekből állnak viszont, ami feltételez egy lossy mappinget. Úgyhogy a végleges transzformációt ezen (https://stackoverflow.com/questions/22649629/convert-contents-of-an-image-into-an-ascii-image) a linken hivatkozott kód (https://gist.github.com/shmert/3859200) alapján írtam meg.
 		</para>
 		<para>
-			Ennek a feladatnak a megoldása a források közt az asciiart mappában található. Mellékeltem egy ok.png példa képet ugyanabban a mappában.
+			A kódot a book-sources mappába tettem asciiart néven. Mellékeltem egy ok.png példa képet ugyanabban a mappában bemenetnek.
 		</para>
 	</section>
 	<section>
@@ -26,7 +26,7 @@
 			A feladat az volt, hogy írjunk egy Java programot, ami a bemenetről olvas sorokat, és Caesar-kódolva egy fájlba menti (soronként). Szerencsémre egy ehhez nagyon hasonló feladatot már kellett implementálnom Pythonban egy másik tárgyra, úgyhogy a logikát onnan fogom portolni. Maga az algoritmus amúgy rendkívül egyszerű. A Caesar-kódolás annyit jelent, hogy a bemeneti karaktereket az ábécében egy fixed mennyiséggel eltoljuk. Az "A"-ból így lesz pl. "B", ha az eltolás mértékét 1-nek választjuk. Az eltolási folyamat wrappel, azaz ha "túltoljuk", az ábécé elejéről kezdünk el elemeket bevenni.
 		</para>
 		<para>
-			A korábban megírt Python programom:
+			Egy korábban megírt Python programom:
 			<programlisting language="python"><![CDATA[
 #!/usr/bin/env python3
 # coding: utf-8
@@ -64,10 +64,10 @@ def main():
 if __name__ == '__main__':
     main()
 			]]></programlisting>
-			Itt a feladat egy példaszöveg dekódolása volt, ami korábban Caesar-kódoláson esett át, az eltolás mértéke itt kettő volt. Cél volt a formázás megtartása is, így kizárólag a betűket érintette a kód.
+			Itt a feladat egy példaszöveg dekódolása volt, ami korábban Caesar-kódoláson esett át, az eltolás mértéke itt kettő volt. Cél volt a formázás megtartása is, így kizárólag a betűket érintette a kód. Jó alap a Caesar kódolás bemutatására. Most effektív ugyanezt fogom megvalósítani, csak adott szöveg helyett soronként olvasom be a standard bemenetről, és a kimenet fájlba megy majd.
 		</para>
 		<para>
-			Ennek a feladatnak a megoldása a források közt a caesar mappában található. [TODO]
+			A kódot a book-sources mappába tettem caesar néven.
 		</para>
 	</section>
 </chapter>
