@@ -24,7 +24,7 @@ jobs:
 
       # Run my custom dependency setup
       - name: Set up dependencies
-        run: sudo apt install -y docbook docbook-xml docbook-xsl docbook-xsl-ns xsltproc build-essential dblatex graphviz texlive-lang-european
+        run: sudo apt-get update && sudo apt install -y docbook docbook-xml docbook-xsl docbook-xsl-ns xsltproc build-essential dblatex graphviz texlive-lang-european
 
       # Verify dblatex is installed
       - name: Test for dblatex
