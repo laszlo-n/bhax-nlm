@@ -36,7 +36,64 @@ public class BugousStuffProducer {
 			Mivel azonban ez a buffer, ami létrejön pl. egy <emphasis>Writer</emphasis> objektum létrehozásakor, a programunk memóriaterületében van tárolva, ezért ha a programunk valamilyen okból váratlanul leáll, a még nem diskre vitt változtatások elvesznek. Alapesetben, ha sikeresen lezártuk volna a fájl írását (a <emphasis>writer.close()</emphasis>-zal), akkor a változtatások ún. <emphasis>flush</emphasis>-ölésre kerültek volna, azaz ki lettek volna írva a háttértárra. Mivel azonban a példakódban az <emphasis>Object.finalize()</emphasis> van override-olva, ez csak akkor fut le, ha a garbage collector észreveszi, hogy nincs már több referrált BugousStuffProducer objektumpéldányuk, és eltakarítja a memóriából a hátramaradtakat.
 		</para>
 		<para>
-			Ha tudjuk, hogy nem fogjuk abúzolni a <emphasis>writeStuff()</emphasis> metódust, egy lehetséges workaround lehet egy <emphasis>writer.flush()</emphasis> sor beszúrása a metódus végére. Ezzel kikényszerítjük a flusht a write() hívás után, és garantáljuk, hogy a szöveg kiírásra kerül.
+			Ha tudjuk, hogy nem fogjuk abúzolni a <emphasis>writeStuff()</emphasis> metódust, egy lehetséges workaround lehet egy <emphasis>writer.flush()</emphasis> sor beszúrása a metódus végére. Ezzel kikényszerítjük a flusht a write() hívás után, és garantáljuk, hogy a szöveg kiírásra kerül. Ennek viszont az az ára, hogy ha mégis abúzoljuk, akkor minden egyes futás masszív overheadet sóz a nyakunkba, és ugyanott leszünk ahol a part szakad.
+		</para>
+		<para>
+			De térjünk vissza a finalize()-ra! A finalize() Java 9 óta deprecated, és "inherently problematic"-ként hivatkozik rá a dokumentáció. TÖbb indokból nyilatkozik így (a lista nem kimerítő jellegű):
+			<itemizedlist>
+				<listitem>
+					<para>a finalize()-bármikor meghívhatja a GC, azaz akár semmikor. Nincs rá garancia például, hogy a programból való kilépés során meghívásra kerül a finalize(), ami resource leakhez vezet (említve feljebb),</para>
+				</listitem>
+				<listitem>
+					<para>amennyiben kivétel vagy hiba történik egy finalize() végrehajtása során, a kivétel/hiba ignorálásra kerül, és az objektum fel lesz szabadítva, ami veszélyes lehet,</para>
+				</listitem>
+				<listitem>
+					<para>ha egy származtatott osztály nem közvetlenül származik az Objectből, és mind valamelyik szülőosztálya, mind ő maga felüldefiniálja a finalize()-t, akkor az ősosztály finalize()-át kézzel kell meghívni, finally blokkból, különben az a rész nem fog lefutni, esetleges resource leakhez vezetve,</para>
+				</listitem>
+				<listitem>
+					<para>a finalize() nem szakítható meg, ami egy többszálas alkalmazás esetén probléma lehet,</para>
+				</listitem>
+			</itemizedlist>
+			Mit érdemes viszont akkor használni? Nos, ugyanez a dokumentációs oldal megválaszolja a kérdést: implementálni kell az AutoCloseable interfészt, valamint lehetőséget kell biztosítani az elrejtett erőforrás kívülről lezárására. <link xlink:href="https://docs.oracle.com/en/java/javase/13/docs/api/java.base/java/lang/Object.html#finalize()">https://docs.oracle.com/en/java/javase/13/docs/api/java.base/java/lang/Object.html#finalize()</link> További érdekes információk a témáról: <link xlink:href="https://stackoverflow.com/questions/52879761/should-java-9-cleaner-be-preferred-to-finalization">https://stackoverflow.com/questions/52879761/should-java-9-cleaner-be-preferred-to-finalization</link>.
+		</para>
+		<para>
+			Próbáljuk meg tehát implementálni az AutoCloseable interfészt az osztályunkba, és kiegészíteni egy explicit lezáró metódussal (esetünkben a két dolog ugyanazt a close() metódust eredményezi):
+			<programlisting language="java"><![CDATA[
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+
+public class BugousStuffProducer implements AutoCloseable, Closeable {
+    private final Writer writer;
+    private static boolean inUse = false;
+
+    public BugousStuffProducer(String outputFileName) throws IOException {
+        writer = new FileWriter(outputFileName);
+        inUse = true;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (inUse) {
+        	inUse = false; // fontos, hogy előtte kell, ld. Closeable interfész dokumentáció
+            writer.close();
+        }
+    }
+
+    public void writeStuff() throws IOException {
+        if (inUse) {
+            writer.write("Stuff");
+        }
+        else {
+            throw new IOException("This " + this.getClass().getSimpleName() + " object's Writer has already been closed!");
+        }
+    }
+}
+			]]></programlisting>
+			Több apróságot is átírtam, nézzük sorjában! Hozzáadtam egy fieldet kezdésképp, ami rögzíti, hogy a resource amit kinyitunk, használatban van-e. Ebben az esetben ez puszta pedantikusság - a dokumentáció erős javaslata, mivel előfordulhat, hogy kétszer lesz az objektumunk close() metódusa véletlenül meghívva, és ilyenkor javasolt, hogy a resourceok ugyanúgy lezárva maradjanak, és mellékhatások ne keletkezzenek. Itt semmi egyebet nem végez a close() metódusunk, csupán a tárolt resource close() metódusát hívja meg, így erre igazából nincs itt szükség - de érdemes volt említést tenni róla.
+		</para>
+		<para>
+			De ha már close() metódus, a másik, lényegesen nagyobb változás, hogy immár nem override-olom az Object.finalize()-t, hanem helyette az AutoCloseable interfész által előírt egyetlen metódust, a close()-t implementálom. Ez a metódus automatikusan meghívásra kerül a try-with-resources statementek használata végén, így mindig garantáltan le lesznek zárva az erőforrásain - vagy legalábbis több esetben, mint a finalize()-ban bizakodva. Ami ennél sokkal fontosabb viszont, hogy mindenképp <emphasis>mielőbb</emphasis> meghívásra kerül, jellemzően sokkal hamarabb, mintha csak a GC-re várnánk, valamint prediktálható módon. A finalize() egyetlen jelenleg is érdemes hasznosságára a következő oldalon bukkantam, érdekes olvasmány ez is: <link xlink:href="https://softwareengineering.stackexchange.com/questions/288715/is-overriding-object-finalize-really-bad">https://softwareengineering.stackexchange.com/questions/288715/is-overriding-object-finalize-really-bad</link> Mindenesetre ez is egy rabbit hole, mint sok minden más :)
 		</para>
 	</section>
 	<section>
@@ -57,43 +114,122 @@ var firstMatchesThirdWithEqualToOperator = first == third;
 			]]></programlisting>
 		</para>
 		<para>
-			A feladat a referenciák és az értékek összehasonlítását hivatott demonstrálni. Alapesetben az assertek a következő eredményeket fogják hozni: igaz, hamis, igaz, hamis; ilyen sorrendben. Ez azért van, mert az == operátor a Javaban alapértelmezett esetben a referenciákat hasonlítja össze - azaz, hogy két változó ugyanarra az objektumra mutat-e a memóriában, vagy sem. Ezzel szemben a <emphasis>.equals()</emphasis> hívása érték szerinti egyenlőséget vizsgál, két, értékében összehasonlítható objektum között.
+			A feladat a referenciák és az értékek összehasonlítását hivatott demonstrálni. Alapesetben az assertek a következő eredményeket fogják hozni: igaz, hamis, igaz, hamis; ilyen sorrendben (ez nem igaz, de egyelőre tegyük fel, ld. 2 bekezdéssel lejjebb). Ez azért van, mert az == operátor a Javaban alapértelmezett esetben a referenciákat hasonlítja össze - azaz, hogy két változó ugyanarra az objektumra mutat-e a memóriában, vagy sem. Ezzel szemben a <emphasis>.equals()</emphasis> hívása érték szerinti egyenlőséget vizsgál, két, értékében összehasonlítható objektum között.
 		</para>
 		<para>
-			Mindezeket figyelembe véve viszont, én úgy gondolom a feladat nem oldható meg. A megoldáshoz a <emphasis>String second = "...";</emphasis> sort kellene módosítanunk, méghozzá a következő módon: <emphasis>String second = first;</emphasis> Mivel ezt a feladat szabályai szerint nem tehetjük meg, a feladat véleményem szerint nem megoldható.
+			A trükk itt az ún. string interning lesz. A string interning egy olyan módszer, ahol bizonyos fix stringeket immutable-ként, fix helyen, önmagukban eltárolunk egy ún. string intern poolban. Ez azért jó, mert így pl. ha hot codeban össze kell hasonlítsunk két jól ismert stringet, amit korábban internáltunk, akkor bájtkód szinten ez már csak mutatók összehasonlítása lesz, ami jóval gyorsabb a rövidebb string O(n) karakterisztikájú összehasonlítási idejénél. Ezt Javában a String osztály intern() metódusa kezeli nekünk, amelyet ha meghívunk egy String objektumra, akkor ha már benne volt az interning poolban, visszaadja a poolba mutató referenciát, ha viszont nem, akkor eltárolja benne, és aztán ad vissza egy odamutató referenciát.
+		</para>
+		<para>
+			Viszont ha már Java és string interning, fontos megemlíteni hogy minden, fordításidőben meghatározható string interningre kerül, azaz a három "..." literál amit megadtunk ugyanazon memóriacímen fog élni. Emiatt, a kettővel ezelőtti bekezdésben állítottakkal szemben, ha lefuttatjuk a kódot, 4 true értéket kapunk majd. Ez azt jelenti, hogy valahogy úgy kell beállítanunk a third változó értékét, hogy bár tartalmilag megegyezzen majd a first-tel, valahogy elkerülje a fordításidejű interninget, és más memóriacímre kerüljön... nos, mi lenne ha expliciten létrehoznánk akkor egy <emphasis>új</emphasis> stringet?
+			<programlisting language="java"><![CDATA[
+public class Interning {
+    public static void main(String[] args) {
+        // Given
+        String first = "...";
+        String second = "...";
+        String third = new String("...");
+
+        // When
+        var firstMatchesSecondWithEquals = first.equals(second);
+        var firstMatchesSecondWithEqualToOperator = first == second;
+        var firstMatchesThirdWithEquals = first.equals(third);
+        var firstMatchesThirdWithEqualToOperator = first == third;
+
+        // Then
+        System.out.println(firstMatchesSecondWithEquals);
+        System.out.println(firstMatchesSecondWithEqualToOperator);
+        System.out.println(firstMatchesThirdWithEquals);
+        System.out.println(firstMatchesThirdWithEqualToOperator);
+    }
+}
+			]]></programlisting>
+			Ennyiről volna szó.
 		</para>
 	</section>
 	<section>
 		<title>EPAM: Java GC</title>
 		<para>
-			A JVM fel van szerelve egy ún. garbage collector-ral (szemétgyűjtővel), ami a már nem referrált objektumok memóriából való felszabadítását hivatott automatizálni. Mostanra, a JVM-mel nem kevesebb mint 7 elérhető GC implementáció szállítódik.
-			Ezek a következők:
+			<emphasis>A feladat:</emphasis> Mutasd be nagy vonalakban hogyan működik Java-ban a GC (Garbage Collector). Lehetséges az OutOfMemoryError kezelése, ha igen milyen esetekben?
+		</para>
+		<para>
+			A JVM fel van szerelve egy (amúgy több) ún. garbage collector-ral (szemétgyűjtővel), ami a már nem referrált objektumok memóriából való felszabadítását hivatott automatizálni.
+		</para>
+		<para>
+			Ennek előnye, hogy nem a programozó feladata a memória lefoglalása és felszabadítása, így jelentősen megtizedeli a memory leakek előfordulását (bár nem garantálja hogy nem fordul elő soha). Továbbá azt is biztosítja, hogy nem jöhetnek létre dangling pointerek, azaz olyan referenciák, amik igazából egy érvénytelen, nem létező objektum memóriacímére mutatnak.
+		</para>
+		<para>
+			Hátránya viszont, hogy emiatt nyilván kell tartani minden objektumhivatkozást, illetve azok megszűnését, ami extra számítási kapacitást vesz igénybe. Az is igaz továbbá, hogy emiatt nem lesz lehetőségünk kézzel felszabadítani egy objektumot, arra csak a GC képes - ez egy újabb szeg lehet a hatékonyság koporsójába.
+		</para>
+		<para>
+			Alapvetően a JVM egy elméleti dolog, egy specifikáció, amihez többféle implementáció létezik. Ezek az implementációk mind-mind más JIT és GC megközelítéseket használnak. A következőkben a Java SE és az OpenJDK által egyiránt használt HotSpot VM-ről fogok beszélni.
+		</para>
+		<para>
+			A HotSpot VM négyfajta gyűjtőt tartalmaz (vagy tartalmazott, Java 13 idején) <link xlink:href="https://docs.oracle.com/en/java/javase/13/gctuning/available-collectors.html">https://docs.oracle.com/en/java/javase/13/gctuning/available-collectors.html</link>
 			<itemizedlist>
 				<listitem>
-					<para>Serial Garbage Collector</para>
+					<para>Egyszálas GC-k</para>
 				</listitem>
 				<listitem>
-					<para>Parallel Garbage Collector</para>
+					<para>Többszálas GC-k</para>
 				</listitem>
 				<listitem>
-					<para>CMS Garbage Collector</para>
+					<para>A "többnyire többszálas" GC-k (G1, CMS)</para>
 				</listitem>
 				<listitem>
-					<para>G1 Garbage Collector</para>
+					<para>Az újgenerációs GC-k (Epsilon, Z, Shenandoah)</para>
+				</listitem>
+			</itemizedlist>
+			Menjünk végig sorban mindhárom kategórián, és nézzük meg mit rejtenek!
+		</para>
+		<para>
+			A serial collectorok egy darab, blokkoló szálon végzik a szemétgyűjtést - ez hatékony lehet, ha kevés adattömegünk van, vagy egyprocesszoros rendszeren vagyunk. Bizonyos esetekben ez az alapértelmezés.
+		</para>
+		<para>
+			A parallel collector (más néven throughput collector) a serial collectorhoz hasonlóan egy generational collector. Több szálon fut viszont, amivel jelentősen meggyorsítja a szemétgyűjtést. Sokprocesszoros és/vagy többszálas környezetkben javasolt a használata.
+		</para>
+		<para>
+			Jöjjenek akkor a "mostly concurrent" GC-k, azaz a többnyire párhuzamosan működő szemétgyűjtők. Kettő érhető el (Java 13-as HotSpot VM esetén): a CMS (Concurrent Mark Sweep) és a Garbage-First (G1).
+			<itemizedlist>
+				<listitem>
+					<para>A G1 főleg szerverekre szánt collector, ahol sokprocesszoros rendszerek vannak, sok memóriával. Nagy valószínűséggel tudja a szemétgyűjtésre szánt időlimitet betartani, miközben gyorsan is teszi a dolgát.</para>
 				</listitem>
 				<listitem>
-					<para>Epsilon Garbage Collector</para>
-				</listitem>
-				<listitem>
-					<para>Z garbage collector</para>
-				</listitem>
-				<listitem>
-					<para>Shenandoah Garbage Collector</para>
+					<para>A CMS azoknak az alkalmazásoknak való, amelyek minél rövidebb megszakításokat akarnak szemétgyűjtésre tartani, és jobban tudnak szemétgyűjtésre CPU időt költeni. Ez a GC JDK 9 óta deprecated.</para>
 				</listitem>
 			</itemizedlist>
 		</para>
 		<para>
-			Mindegyik GC-nek megvan a saját trükkje, és az azokkal járó komplexitás is.
+			Végül nézzük a legújabb GC implementációkat. Az Epsilon és Z GC-k a Java 11-ben lettek bevezetve, és mindkettő elég különleges a működése tekintetében. Kezdjük az Epsilonnal!
+		</para>
+		<para>
+			Az Epsilon GC egy ún. no-op GC. Mindössze annyi feladatot vállal át a programozótól, hogy lefoglalja a memóriát - felszabadítani már sosem fogja. Ez furcsának tűnhet, azonban megvan a maga gyakorlati haszna. Többek közt nagyon alacsony késleltetésű, valamint teljesen megszűnteti a garbage collection miatt "szükséges" app thread pauseokat. Ahogy azt sejteni lehet, ez meglehetősen specifikus helyzetekben hasznos csak, ilyenek a következők: teljesítmény-tesztelés, memóriaéhség-mérés, VM overhead mérés, nagyon rövid ideig futó programokra, illetve ha pontosan tudjuk, mennyi memóriát fogunk felhasználni.
+		</para>
+		<para>
+			Jöhet a Z GC. Ez egy jól skálázható, alacsony késleltetéssel működő szemétgyűjtő. Párhuzamosan gyűjt, és rövid ideig blokkol (~1 ms átlagosan). A Z GC azon alkalmazások számára van ajánlva, ahol fontos az alacsony szemétgyűjtési késleltetés, és/vagy nagyon nagy mennyiségű memóriát használnak (több terabájtnyit). Egy részletesebb betekintés itt olvasható: <link xlink:href="https://www.opsian.com/blog/javas-new-zgc-is-very-exciting/">https://www.opsian.com/blog/javas-new-zgc-is-very-exciting/</link>
+		</para>
+		<para>
+			Zárásképp nézzük a Shenandoah-t. A ZGC-hez hasonlóan egy ultra-alacsony STW (stop the world -- értsd: amíg megállnak az alkalmazás szálai szemétgyűjtés miatt) idejű, rendkívül párhuzamos GC, ami hatalmas mérető heapekkel is elboldogul. A rendkívül alacsony késleltetés érdekében jelentős CPU időt felemészt a használata, és több memóriát is fogyaszt, mint a többi opció, általánosságban. Három módban üzemeltethető, adaptive (ez a default), static és compact. Az első figyeli a GC statisztikákat, és csak arra ügyel, hogy ne fogyjon el a heap. A második jobban concerned a heap telítettsége, és az allokációk gyakorisága iránt. A harmadik arra megy rá, hogy minél több memória fel legyen szabítva, ezért folytonosan futtatja a GC-t.
+		</para>
+		<para>
+			Abban az esetben, ha az alkalmazás gyorsabban allokál memóriát mint ahogy a Shenandoah foglalni tudja, hiba következhet be. Ebben az esetben a következő lépcsőfokokat járja be:
+			<itemizedlist>
+				<listitem>
+					<para>pacing fázis: új allokációra szolgáló programszálakat indít, és bevezet egy adag extra latency-t,</para>
+				</listitem>
+				<listitem>
+					<para>degenerated gc: ha az előbbi nem volt elég, akkor STW-t idéz elő, és rendkívül gyorsan végrehajt egy részleges gc ciklust</para>
+				</listitem>
+				<listitem>
+					<para>full gc: ha ez sem volt elég, akkor jön egy teljes gc ciklus. Ez már elég kell legyen, ha csak elfogyott a memória valójában.</para>
+				</listitem>
+			</itemizedlist>
+			Míg nem olyan rövid megállásokkal dolgozik, mint a ZGC, sokkal kiszámíthatóbbak a megállások előfordulásai, és jobban finomhangolható is.
+		</para>
+		<para>
+			Fontos megemlíteni, hogy minden GC működését tovább is lehet finomhangolni, amiben a hivatalos dokumentáció útmutatást is nyújt: <link xlink:href="https://docs.oracle.com/en/java/javase/13/gctuning/ergonomics.html">https://docs.oracle.com/en/java/javase/13/gctuning/ergonomics.html</link>
+		</para>
+		<para>
+			Most, hogy végigjártuk a GC témakört nagyvonalakban, lássuk érdemes lehet-e elkapni egy OOM errort? Meglepő lehet a válasz, de igen - graceful leállás céljából (és nem másból). Amennyiben ügyelünk arra, hogy még véletlenül se próbáljuk újra allokációba kezdeni, lehetséges lehet fokozotosan felszabadítani az erőforrásokat, logolni a hibákat, és leállni helyesen. Megkísérelni helyreállni semmiképp sem érdemes, mert bár nem kizárható hogy sikerül (ha sikerül elkerülnünk, hogy minden thread ami az OOM errort kapott threadre várt, felébred vissza rendben, illetve ha fel tudunk szabadítani elég mennyiségű objektumot a referenciák eltávolításával), semmi garancia nincs arra, hogy nem kapunk újra OOM-et, amivel akár végtelen ciklusba kerülve végleg tetszhalott lesz a programunk.
 		</para>
 	</section>
 </chapter>
