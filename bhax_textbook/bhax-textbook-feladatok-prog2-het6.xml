@@ -8,30 +8,185 @@
 	<section>
 		<title>EPAM: Mátrixszorzás Stream API-val</title>
 		<para>
-			Két mátrix szorzásának megoldása funkcionális eszközökkel, for/while nélkül.
+			<emphasis>A feladat:</emphasis> Két mátrix szorzásának megoldása funkcionális eszközökkel, for/while nélkül.
+		</para>
+		<para>
+			Kód forrása: <link xlink:href="https://stackoverflow.com/a/34784924/13788648">https://stackoverflow.com/a/34784924/13788648</link>
 			<programlisting language="java"><![CDATA[
-public static int[][] matmul(int[][] first, int[][] second) {
-    if (first[0].length == second.length) {
-		int[][] buffer = new int[first.length][second.length];
-        Arrays.stream(buffer).forEach(e -> {
-        
-        });
-    }
+private static double[][] matmul(double[][] m1, double[][] m2) {
+    return Arrays.stream(m1)
+                 .map(r -> IntStream.range(0, m2[0].length)
+                 .mapToDouble(i -> IntStream.range(0, m2.length)
+                 .mapToDouble(j -> r[j] * m2[j][i])
+                 .sum())
+                 .toArray())
+                 .toArray(double[][]::new);
 }
 			]]></programlisting>
+			Meglehetősen kompakt, nem igaz? Nos igen, rendkívül. Gondoljuk végig amennyire tudjuk!
+		</para>
+		<para>
+			Kezdésnek némi mátrixszorzás 101, mert ha más nem, nekem szükséges. Előfeltétele a mátrixszorzásnak, hogy az első mátrix oszlopainak a száma megegyezzen a második mátrix sorainak a számával. Kódban nekünk a sorok számát egy 2D-s tömbben a .length() fogja visszaadni, míg az oszlopok számát ha dereferáljuk az első sorát a tömbnek, egy arra hívott .length() fogja. Fontos, hogy a kód él azzal a feltételezéssel, hogy a kapott 2D-s tömbök nem ún. "jagged array"-ek, azaz minden sorukban ugyanannyi elem van, valamint azt is feltételezi, hogy a mátrixszorzás előfeltételei teljesülnek (ld. 1 mondattal korábban).
+		</para>
+		<para>
+			With this in mind, nézzük magát az algoritmust. Az első sor első elemét úgy fogjuk megkapni, ha vesszük a szorzatösszegét az m1 tömb első sorának, és az m2 tömb első oszlopának. Az első sor második eleménél még mindig az m1 első sorát fogjuk tekinteni, de már az m2 második oszlopával vesszük a szorzatösszegét. Tegyük fel, hogy a célmátrixunk 2x2-es, akkor a második sor elemei hogy fognak kinézni? Nos, egyszerű: a második sor első eleme az m1 tömb második sorának, és az m2 tömb első oszlopának a szorzatösszege lesz, míg a második sor második eleme az m1 második sorának és az m2 második oszlopának szorzatösszege lesz.
+		</para>
+		<para>
+			Kövessük végig az algoritmust tehát. Láthatjuk, hogy maga a matematikai műveletes rész a közepe tájékán van, így valószínűleg nem lesz egyszerű kibogozni, de az alaplogikát ismerjük. Az első map művelet egy képzetes "r" változóhoz hozzárendel egy indextömböt, ami 0-tól az m2 utolsó oszlopának az indexéig megy (remember, az m2[0].length az az m2 oszlopainak a száma lesz, és mint minden range valaha, itt is jobb oldalról bound exclusive a téma). Viszont, itt nem áll meg a történet!
+		</para>
+		<para>
+			Amint létrejött az indextömbünk, ami ugye a lehetséges oszlopindexeket tartalmazza, az "r"-hez való hozzárendelés előtt továbbmegy a folyamat, méghozzá egy mapToDouble-re. Ennek során mi már tudjuk, hogy double típusú értékekre fogunk mappelni végül az "r"-rel, de azt nem, hogy hogyan. Ez a mapToDouble belül egy képzetes i változóhoz hozzárendel egy újabb indextömböt, ami az összes lehetséges sorindexet tartalmazza. Következik egy újabb mapToDouble, j változóval - és itt kezdődik a valódi matek. Minden elem egy szorzatösszeg - ez az a rész ahol a szorzatokat képezzük. Minden "r" értékre (számra az m1 mátrixban) elhelyezünk egy szorzatot, ami a megfelelő számot az m1-ből összeszorozza a megfelelő számmal az m2-ből (j az a sorok indexe, i az az oszlopoké). Ezek után összegzünk, így áll elő egy érték. 
+		</para>
+		<para>
+			Ez a rendkívül komplex leképezés némi átalakítással zárul, ahol visszafele haladva először tömböt, majd kétdimenziós tömböt készítünk az elemeinkből és visszaadjuk.
 		</para>
 	</section>
 	<section>
 		<title>EPAM: LinkedList vs. ArrayList</title>
 		<para>
-			A láncolt lista gyorsabb beszúrásban, mivel nem kell átméretezni az egész listának fenntartott objektumot, és/vagy átmásolni egy üres, nagyobb memóriaterületre. Az ArrayList gyorsabb hozzáférés esetén, mivel közvetlenül ahhoz az elemhez tudunk hozzáférni, amit az index alapján el kívánunk érni.
-			CODE: TODO
+			<emphasis>A feladat:</emphasis> Mutass rá konkrét esetekre amikor a Java-beli LinkedList és ArrayList rosszabb performanciát eredményezhet a másikhoz képest. (Lásd még LinkedList és ArrayList forráskódja). Végezz méréseket is. (mit csinál az ArrayList amikor megtelik)
+		</para>
+		<para>
+			Amikor az ember kollekciókkal dolgozik, érdemes megfontolnia milyen adatszerkezetet választ magának. Listáknál sokféle opció van, ezekből kettő a LinkedList (egy kétszeresen láncolt lista implementáció) és az ArrayList (dinamikusan önátméretező tömb implementáció). Ha emlékszünk az adatszerkezetek órára, eszünkbe juthat, hogy a láncolt listákba hatékonyan lehet beszúrni, illetve belőlük törölni, míg a tömböknél a konstans-idejű véletlenszerű elérés, és az alacsonyabb memóriafelhasználás a fő erősség. Természetesen más gondolatok is felmerülhetnek; a láncolt lista elemei egyenként mind extra overheaddel járnak, így kevesebb fér belőlük a processzor cachebe, mint amennyi egyébként elférne, míg a tömböknél egy 1,5x hirtelen allokáció csípőből derékba törheti az alkalmazásunkat egy OOM kivétellel, ha épp kezdenénk kifogyni (nem véletlen, hogy érdemes az ArrayListeknek a konstruktorban kezdő nagyságot adni). További információkat ezen a stackoverflow threaden lehet olvasni, informatív: <link xlink:href="https://stackoverflow.com/questions/322715/when-to-use-linkedlist-over-arraylist-in-java">https://stackoverflow.com/questions/322715/when-to-use-linkedlist-over-arraylist-in-java</link>.
+		</para>
+		<para>
+			De mi most nem ezért vagyunk itt - mi számokat akarunk. Kemény, fekete-fehér, egyértelmű számadatokat. Úgyhogy tesztelni kell! Amit mindenképp meg akarok fontolni, az az, hogy 3 mennyiségi kategóriájú adattal milyen gyorsan lehet őket feltölteni, milyen gyorsan lehet véletlenszerűen hozzájuk férni, és hogy milyen gyorsan lehet belőlük véletlenszerűen, illetve egyik-másik végükről törölni.
+		</para>
+		<para>
+			A kódot a book-sources mappába tettem listbench néven.
 		</para>
 	</section>
 	<section>
 		<title>EPAM: Refactoring</title>
 		<para>
-			Hol a feladat?
+			<emphasis>A feladat:</emphasis> Adott egy "legacy" kód mely tartalmaz anonymous interface implementációkat, ciklusokat és feltételes kifejezéseket. Ebben a feladatban ezt a "legacy" kódot szeretnénk átírni lambda kifejezések segítségével (metódus referencia használata előnyt jelent). A program jelenlegi kimenete:
+			<programlisting><![CDATA[
+Runnable!
+Calculation result: 9
+Result numbers:
+1
+9
+25
+Formatted numbers: 1925
+			]]></programlisting>
+			A megoldáshoz ezen az oldalon található információk alapján kezdtem neki: <link xlink:href="https://www.codejava.net/java-core/the-java-language/java-8-lambda-runnable-example">https://www.codejava.net/java-core/the-java-language/java-8-lambda-runnable-example</link> Először egyszerű a dolgunk:
+			<programlisting language="java"><![CDATA[
+Runnable runnable = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Runnable!");
+    }
+};
+runnable.run();
+			]]></programlisting>
+			Ez triviálisan átalakítható:
+			<programlisting language="java"><![CDATA[
+Runnable runnable = () -> { System.out.println("Runnable!"); };
+runnable.run();
+			]]></programlisting>
+			Ugyanez igaz a calculator objektumra is:
+			<programlisting language="java"><![CDATA[
+Calculator calculator = new Calculator() {
+    @Override
+    public Integer calculate(Integer number) {
+        return number * number;
+    }
+};
+			]]></programlisting>
+			Ez lesz belőle:
+			<programlisting language="java"><![CDATA[
+Calculator calculator = (number) -> number * number;
+			]]></programlisting>
+			Elgondolkozhat az ember, hogy de honnan fogja tudni, hogy a calculate method lesz az amit bindolni kell... nos onnan, hogy ha megnézzük a @FunctionalInterface dokumentációját, akkor úgy nyilatkozik, hogy minden interface ami a funkcionális interfészség követelményeinek eleget tesz, automatikusan funkcionális interfészként lesz kezelve, függetlenül attól, hogy rajta van-e az annotation vagy sem. Fontos megemlékezni arról is, hogy ha igazából egyetlen return statement lenne a metódustörzsünk, akkor elég ugye ahogy látjuk egy sima nyíllal rögtön a megálmodott statementünk tartalmára mutatni. Na de, mehetünk tovább, ugrani fogunk a 43. sorra, mivel addig mást nem kell módosítanunk.
+			<programlisting language="java"><![CDATA[
+List<Integer> resultNumbers = new ArrayList<>();
+for (Integer number : inputNumbers) {
+    if (number != null) {
+        Integer calculationResult = calculator.calculate(number);
+        resultNumbers.add(calculationResult);
+    }
+}
+			]]></programlisting>
+			Az átugrott sorokban létrehozott inputNumbers Integer lista elemein csörtetünk végig, és a resultNumbers nevű ArrayList-be hajigáljuk bele őket, ha nem null-ak - except, hogy előtte még a calculatorban megmosdatjuk őket. Ezt is meglehetősen szépen át lehet írni lambda kifejezésesre:
+			<programlisting language="java"><![CDATA[
+List<Integer> resultNumbers = inputNumbers.stream()
+                .filter(Objects::nonNull)
+                .map(calculator::calculate)
+                .collect(Collectors.toList());
+			]]></programlisting>
+			Semmi special, filterezünk az Objects nonNull() metódusa segítségével, mapelünk a számított értékre, majd összegyűjtjük. Megyünk tovább.
+			<programlisting language="java"><![CDATA[
+Consumer<Integer> method = new Consumer<Integer>() {
+    @Override
+    public void accept(Integer integer) {
+        System.out.println(integer);
+    }
+};
+			]]></programlisting>
+			A korábban látott módszer szerint átalakítjuk, észrevehetjük, hogy mit is jelent pontosan a Consumer; szó szerint csupán a metódust jelöljük meg, amibe később passzolni akarunk dolgokat:
+			<programlisting language="java"><![CDATA[
+Consumer<Integer> method = System.out::println;
+			]]></programlisting>
+			A következő sorokat érintetlenül hagyjuk, egészen a 60.-ig:
+			<programlisting language="java"><![CDATA[
+Formatter formatter = new Formatter() {
+    @Override
+    public String format(List<Integer> numbers) {
+        StringBuilder sb = new StringBuilder();
+        for (Integer number : numbers) {
+            String stringValueOfNumber = String.valueOf(number);
+            sb.append(stringValueOfNumber);
+        }
+        return sb.toString();
+    }
+};
+			]]></programlisting>
+			A Formatter osztály is megfelel a funkcionális interfészség követelményeinek, így automatikusan azzá lesz téve. Nincs is más dolgunk, mint alkalmazni az eddigi módszert, talán annyi kivétellel, hogy a StringBuildertől is megszabadulhatunk, hála a Collectors joining() metódusának:
+			<programlisting language="java"><![CDATA[
+Formatter formatter = (numbers) -> numbers.stream()
+        .map(String::valueOf)
+        .collect(Collectors.joining());
+			]]></programlisting>
+			Az utolsó sor pedig marad változatlan. Lássuk együtt az egészet!
+			<programlisting language="java"><![CDATA[
+package com.epam.training.exercise;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+public class LegacyRefactoring {
+
+    public void legacy() {
+        Runnable runnable = () -> { System.out.println("Runnable!"); };
+        runnable.run();
+
+        Calculator calculator = (number) -> number * number;
+
+        Integer result = calculator.calculate(3);
+        System.out.println("Calculation result: " + result);
+
+        List<Integer> inputNumbers = Arrays.asList(1, null, 3, null, 5);
+        List<Integer> resultNumbers = inputNumbers.stream()
+                .filter(Objects::nonNull)
+                .map(calculator::calculate)
+                .collect(Collectors.toList());
+
+        Consumer<Integer> method = System.out::println;
+        System.out.println("Result numbers: ");
+        resultNumbers.forEach(method);
+
+        Formatter formatter = (numbers) -> numbers.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining());
+        System.out.println("Formatted numbers: " + formatter.format(resultNumbers));
+    }
+
+}
+			]]></programlisting>
+			Sokkal tömörebb lett, nemde?
 		</para>
 	</section>
 </chapter>
