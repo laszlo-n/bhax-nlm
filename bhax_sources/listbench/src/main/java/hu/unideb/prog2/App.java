@@ -4,10 +4,13 @@ import java.io.IOException;
 
 public class App {
     public static void main(String[] args) throws IOException {
-        BasicBenchmarker bench = new BasicBenchmarker(System.out, new ListBench(), 500);
-        bench.measure(ListBench::benchLinkedListFillSpeed, "LinkedList's fill performance");
-        bench.measure(ListBench::benchArrayListFillSpeed, "ArrayList's fill performance (when resizing)");
-        bench.measure(ListBench::benchBigArrayListFillSpeed, "ArrayList's fill performance (when NOT resizing)");
+        BasicBenchmarker bench = new BasicBenchmarker(System.out, ListBench.class, 100000);
+        bench.measure(ListBench::benchLinkedListTailFillSpeed, "LinkedList's fill performance");
+        bench.measure(ListBench::benchArrayListTailFillSpeed, "ArrayList's fill performance (when resizing)");
+        bench.measure(ListBench::benchBigArrayListTailFillSpeed, "ArrayList's fill performance (when NOT resizing)");
+        bench.measure(ListBench::benchLinkedListHeadFillSpeed, "LinkedList's head-first fill performance");
+        bench.measure(ListBench::benchArrayListHeadFillSpeed, "ArrayList's head-first fill performance (when resizing)");
+        bench.measure(ListBench::benchBigArrayListHeadFillSpeed, "ArrayList's head-first fill performance (when NOT resizing)");
         bench.measure(ListBench::benchRandomAccessFromLinkedList, "LinkedList's random access performance");
         bench.measure(ListBench::benchRandomAccessFromArrayList, "ArrayList's random access performance");
         bench.measure(ListBench::benchRandomRemoveFromLinkedList, "LinkedList's random remove performance");

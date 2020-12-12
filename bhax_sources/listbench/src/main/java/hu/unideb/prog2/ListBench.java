@@ -12,25 +12,43 @@ public class ListBench implements Benchmark {
         linkedList = new LinkedList<>();
         smallArrayList = new ArrayList<>();
         bigArrayList = new ArrayList<>(2000);
-        benchLinkedListFillSpeed();
-        benchBigArrayListFillSpeed();
+        benchLinkedListTailFillSpeed();
+        benchBigArrayListTailFillSpeed();
     }
 
-    public void benchLinkedListFillSpeed() {
+    public void benchLinkedListTailFillSpeed() {
         for (int i = 0; i < 500; i++) {
             linkedList.add(i);
         }
     }
 
-    public void benchArrayListFillSpeed() {
+    public void benchArrayListTailFillSpeed() {
         for (int i = 0; i < 500; i++) {
             smallArrayList.add(i);
         }
     }
 
-    public void benchBigArrayListFillSpeed() {
+    public void benchBigArrayListTailFillSpeed() {
         for (int i = 0; i < 500; i++) {
             bigArrayList.add(i);
+        }
+    }
+
+    public void benchLinkedListHeadFillSpeed() {
+        for (int i = 0; i < 500; i++) {
+            linkedList.addFirst(i);
+        }
+    }
+
+    public void benchArrayListHeadFillSpeed() {
+        for (int i = 0; i < 500; i++) {
+            smallArrayList.add(0, i);
+        }
+    }
+
+    public void benchBigArrayListHeadFillSpeed() {
+        for (int i = 0; i < 500; i++) {
+            bigArrayList.add(0, i);
         }
     }
 
@@ -42,7 +60,7 @@ public class ListBench implements Benchmark {
 
     public void benchRandomAccessFromArrayList() {
         for (int i = 0; i < 100; i++) {
-            Integer temp = bigArrayList.get((int) (Math.random() * linkedList.size()));
+            Integer temp = bigArrayList.get((int) (Math.random() * bigArrayList.size()));
         }
     }
 
@@ -54,7 +72,7 @@ public class ListBench implements Benchmark {
 
     public void benchRandomRemoveFromArrayList() {
         for (int i = 0; i < 100; i++) {
-            Integer temp = bigArrayList.remove((int) (Math.random() * linkedList.size()));
+            Integer temp = bigArrayList.remove((int) (Math.random() * bigArrayList.size()));
         }
     }
 
