@@ -6,6 +6,18 @@
 		</keywordset>
 	</info>
 	<section>
+		<title>Encoding</title>
+		<para>
+			<emphasis>A feladat:</emphasis> Fordítsuk le és futtassuk a Javat tanítok könyv MandelbrotHalmazNagyító.java forrását úgy, hogy a fájl nevekben és a forrásokban is meghagyjuk az ékezetes betűket! <link xlink:href="https://www.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/adatok.html">https://www.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/adatok.html</link>
+		</para>
+		<para>
+			Szerencsére a Sublime Text ezt a munkát könnyedén elvágezte helyettem :). A kódot a book-sources mappába tettem mandelbrot néven, az App osztály meg is tudja futtatni, a paramétereket a Javát Tanítok könyvből csentem. Proof, hogy működik:
+			<informalfigure>
+				<graphic fileref="images/mandelbrot.png"></graphic>
+			</informalfigure>
+		</para>
+	</section>
+	<section>
 		<title>EPAM: Order of Everything</title>
 		<para>
 			A kódot a book-sources mappába tettem orderezes néven.

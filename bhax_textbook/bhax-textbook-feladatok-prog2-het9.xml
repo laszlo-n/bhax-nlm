@@ -14,7 +14,7 @@
 			A reaktív programozás lényege az eseményorientáltságban, az aszinkronitásban, és az ún. "back-pressure"-ben keresendő. A néhánymondatos cikk amit hirtelen találtam annyit nyilatkozott, hogy a back-pressure, pontosabban a non-blocking back pressure egy olyan mechanizmus, amivel elkerülhető, hogy túlterheljünk egy másik komponenst, ami bejövő adatokat dolgoz fel; méghozzá úgy, hogy az a feldolgozó komponens (consumer) lesz felelős az adatok elkéréséért, így kontrollja lesz a mennyiség felett, elérve hogy biztosan csak annyit adatot vegyen magához, amit kezelni tud.
 		</para>
 		<para>
-			TODO: folytatni, kidolgozni, magát a kódolós részt leimplementálni
+			Szerk.: Ended up not doing it, helyette kiváltom XP-vel.
 		</para>
 	</section>
 	<section>
