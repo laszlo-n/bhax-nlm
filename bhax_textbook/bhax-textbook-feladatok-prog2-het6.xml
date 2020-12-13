@@ -53,7 +53,47 @@ private static double[][] matmul(double[][] m1, double[][] m2) {
 			De mi most nem ezért vagyunk itt - mi számokat akarunk. Kemény, fekete-fehér, egyértelmű számadatokat. Úgyhogy tesztelni kell! Amit mindenképp meg akarok fontolni, az az, hogy 3 mennyiségi kategóriájú adattal milyen gyorsan lehet őket feltölteni, milyen gyorsan lehet véletlenszerűen hozzájuk férni, és hogy milyen gyorsan lehet belőlük véletlenszerűen, illetve egyik-másik végükről törölni.
 		</para>
 		<para>
-			A kódot a book-sources mappába tettem listbench néven.
+			A kódot a book-sources mappába tettem listbench néven. Lássuk az eredményeket!
+			<programlisting><![CDATA[
+Benchmarking LinkedList's fill performance...
+Finished on avg in 4933 ns across 100000 runs.
+Benchmarking ArrayList's fill performance (when resizing)...
+Finished on avg in 2699 ns across 100000 runs.
+Benchmarking ArrayList's fill performance (when NOT resizing)...
+Finished on avg in 1595 ns across 100000 runs.
+Benchmarking LinkedList's head-first fill performance...
+Finished on avg in 2754 ns across 100000 runs.
+Benchmarking ArrayList's head-first fill performance (when resizing)...
+Finished on avg in 28619 ns across 100000 runs.
+Benchmarking ArrayList's head-first fill performance (when NOT resizing)...
+Finished on avg in 46385 ns across 100000 runs.
+Benchmarking LinkedList's random access performance...
+Finished on avg in 19920 ns across 100000 runs.
+Benchmarking ArrayList's random access performance...
+Finished on avg in 2343 ns across 100000 runs.
+Benchmarking LinkedList's random remove performance...
+Finished on avg in 18202 ns across 100000 runs.
+Benchmarking ArrayList's random remove performance...
+Finished on avg in 7646 ns across 100000 runs.
+Benchmarking LinkedList's tail remove performance...
+Finished on avg in 417 ns across 100000 runs.
+Benchmarking ArrayList's tail remove performance...
+Finished on avg in 189 ns across 100000 runs.
+Benchmarking LinkedList's head remove performance...
+Finished on avg in 426 ns across 100000 runs.
+Benchmarking ArrayList's head remove performance...
+Finished on avg in 6149 ns across 100000 runs.
+			]]></programlisting>
+			Mint láthatjuk, nagyságrendbeli különbségek vannak a különböző műveletek közt a különböző adatstruktúrák esetén. Az első 3 teszt megmutatja, hogy egyszerűen a listába töltve az ArrayList szerepel a legjobban, ha megadunk neki egy életszagú kezdetleges kapacitást; rögtön követi a naivan létrehozott ArrayList, végül pedig a LinkedList. A sorrend teljesen megfordul viszont, ha head-first, azaz ha az elejére beszúrógatva töltjük fel őket (köv. 3 teszt): itt a LinkedList toronymagasan vezet, több mint 10x gyorsabb mint a naivan létrehozott ArrayList, és majd 17x gyorsabb a paraméterezett ArrayListnél, azt sugallva hogy az újraméretezés valahogy lenyel némi bottlenecket a folyamat során.
+		</para>
+		<para>
+			A véletlen hozzáférés idejét mérő tesztben az ArrayList ismét nyer viszont, méghozzá több mint 8,5X nagyobb throughputtal. A véletlen eltávolítás is hasonló történet; bár itt azt hinné az ember, hogy nagyot szenved majd az ArrayList a folyamatos átrendezgetések miatt, úgy tűnik a LinkedList jóval hosszabb bejárási ideje nagyobb bottlenecknek bizonyul.
+		</para>
+		<para>
+			Végül lássuk a head-first és tail-first törlési időket. A listák végéről törlésben valamennyire meglepő módon az ArrayList nyer a kétszeresen láncolt LinkedList-tel szemben, bár alig több mint 2x sebességgel. Nagyot fordít azonban a LinkedList, ha a head-first, azaz az elejéről törlést vizsgáljuk. Az ArrayList számára ez gyakorlatilag worst-case scenario, és ez az eredményen is meglátszik: a LinkedList majd 14,5X olyan gyors ebben a tesztben, mint az ArrayList - szinte nanosecre pontosan ugyanolyan gyors, mint a lista végéről való eltávolításban.
+		</para>
+		<para>
+			Láthatjuk, hogy a dokumentáció és az elmélet nem hazudott, valóban az ismertetett előnyökkel és hátrányokkal rendelkeznek ezek az adatszerkezetek. Ezért fontos mindig elgondolkozni, hogy pontosan milyen adatszerkezetet használjunk, illetve ha már az ArrayList mellé tesszük a voksunkat, ne felejtsünk el initial capacity-t adni neki.
 		</para>
 	</section>
 	<section>
