@@ -1,0 +1,66 @@
+<chapter xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="hu">
+	<info>
+		<title>Megoldott XP-s feladatok</title>
+		<keywordset>
+			<keyword/>
+		</keywordset>
+	</info>
+	<section>
+		<title>Mi ez?</title>
+		<para>
+			Ez a fejezet azokat az XP-s feladatokat, és az általuk megszerzett XP-t gyűjti össze, amiket a félév során összegyűjtöttem. XP alatt eXperience Point-ra kell gondolni, azaz tapasztalati pontokra - ezek voltak a gamifikációs törekvések miatt kitalált valuta a tárgynál.
+		</para>
+	</section>
+	<section>
+		<title>Sajat-Map Unit Test-ek írása</title>
+		<para>
+			<emphasis>A feladat:</emphasis> Írj annyi unit tesztet amennyit csak bírsz! Maximum 5 tesztesetért jár XP, mindegyikért 6 XP.
+		</para>
+		<para>
+			A feladat megoldását a book-sources mappába tettem sajat-map néven. Több mint 5 unit tesztet készítettem, így ezért járt mind a 30 XP.
+		</para>
+	</section>
+	<section>
+		<title>XML-To-SVG általánosítása</title>
+		<para>
+			<emphasis>A feladatok a következők voltak:</emphasis>
+			<itemizedlist>
+				<listitem>
+					<para>parancssori argumentumként fogadja a forrás és cél fájlt -> 5 xp</para>
+				</listitem>
+				<listitem>
+					<para>különböző államok városai különböző színnel jelennének meg a térképen -> 10 xp</para>
+				</listitem>
+				<listitem>
+					<para>tudjon PNG-be is exportálni (lehetőleg ne módosítsunk az eléréséhez a meglévő kódon) -> 40 xp</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			A feladat megoldását a book-sources mappába tettem xml-to-svg néven. Mindhárom alfeladatot teljesítettem, így ezért járt mind az 55 XP.
+		</para>
+	</section>
+	<section>
+		<title>iris műveletek</title>
+		<para>
+			<emphasis>A feladatok a következők voltak:</emphasis> paraméterként kapja meg a program a bemeneti fájlt, be kéne olvasni, átlagot vonni fajtánként, majd kiírni így (konzolra):
+			<programlisting><![CDATA[
+<Fajta neve>:
+		Adatpontok száma: <adatpontok száma>
+		Átlagok:
+			Petal Width: <pwidth>
+			Petal Length: <plen>
+			Sepal Width: <swidth>
+			Sepal Length: <slen>
+			]]></programlisting>
+			Ez eddig 50 XP, mediánnal kiegészítve +20 XP, opcionális második param outfile oda menjen: +10 XP.
+		</para>
+		<para>
+			A feladat megoldását a book-sources mappába tettem iris néven. Mindhárom opcionális követelményt teljesítettem, így ezért járt mind az 80 XP.
+		</para>
+	</section>
+	<section>
+		<title>Összesítés</title>
+		<para>A három XP-s feladat összes követelményét teljesítve összesen tehát 165 XP-t szereztem. A korábban megbeszélt határok mentén, ebből 150 XP-t egy feladat kiváltására szeretnék felhasználni, ez pedig az epam-os reaktív programozásos feladat a 9. fejezetből. Ezzel a könyv egy 3-as érdemjegyet képvisel.</para>
+	</section>
+</chapter>
