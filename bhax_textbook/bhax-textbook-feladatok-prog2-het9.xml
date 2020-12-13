@@ -167,13 +167,10 @@ Complete: Hey, HELLO World
 	<section>
 		<title>EPAM: AOP</title>
 		<para>
-			Ebben a feladatban némi aspektus-orientált programozást kellett végezni, először AspectJ, majd Spring AOP segítségével. Koncepciószinten az ötletem a következő volt:
+			Ebben a feladatban némi aspektus-orientált programozást kellett végezni, először AspectJ, majd Spring AOP segítségével. Az AOP cross-cutting concern-ök elegáns kezelését hivatott elősegíteni, mint például a logolás, amire ugye minden osztályban szükség van - vagy például benchmarking esetén. Koncepciószinten az ötletem a következő volt:
 			<itemizedlist>
 				<listitem>
-					<para>mivel mérni kell valamilyen metódusnak a futási idejét, ezért létrehozok két metódust, amelyek feltöltenek egy adott típusú listát egy átadott számú random elemmel, majd eltávolítanak belőle a teljes darabszám gyökével egyenlő mennyiségűt, random ill. egymást követő indexekről;</para>
-				</listitem>
-				<listitem>
-					<para>létrehozok egy-egy pointcutot a metódusokra;</para>
+					<para>fogom a korábban megírt listbench programomat, és létrehozok egy pointcutot a measure metódus köré;</para>
 				</listitem>
 				<listitem>
 					<para>a before()-ban elindítok egy timert;</para>
@@ -184,14 +181,58 @@ Complete: Hey, HELLO World
 				<listitem>
 					<para>rinse-repeat Spring AOP-vel, reménykedve, hogy nagyjából hasonló az AspectJ-hez, amit ugye néztünk órán;</para>
 				</listitem>
-				<listitem>
-					<para>mindezek közben pedig bőszen vizsgálgatom majd a rögzített óraanyagot és a Google-t.</para>
-				</listitem>
 			</itemizedlist>
 			Sure enough, stabil tervnek tűnt. Lássuk, hogy alakult!
 		</para>
 		<para>
-			TODO
+			Először AspectJ-vel álltam neki. Létrehoztam egy BasicBenchmarkerAspect.aj fájlt, amibe a következő kódot tettem:
+			<programlisting><![CDATA[
+aspect BasicBenchmarkAspect {
+	pointcut measurement(): call(void BasicBenchmarker.measure(*,*));
+	
+	before(): measurement() {
+		System.out.println("Measurement started...");
+	}
+	
+	void around(): measurement() {
+		long before = System.nanoTime();
+		proceed();
+		long after = System.nanoTime();
+		System.out.println(String.format("The entire measurement took %d ms.", (long) (after - before) / 1000000));
+	}
+	
+	after(): measurement() {
+		System.out.println("Measurement finished.");
+	}
+
+}
+			]]></programlisting>
+			Ezzel azt mérem le, hogy ha valaki meghívja a BasicBenchmarker osztályomból a measure metódust, a teljes measurement az összes iterációval mennyi időt emészt fel. Először létrehozok egy pointcutot measurement() néven, amiben megjelölök egy joinpointot minden hívás körül, amire illik az a szignatúra-pattern, hogy void a visszatérési érték, és a neve BasicBenchmark.measure, valamint két paramétere van.
+		</para>
+		<para>
+			Ezt követően van egy before(), egy around(), és egy after() metódusom, ami mind erre a measurement pointcutra aggaszkodik rá. A before a hívás végrehajtása előtt, az after pedig utána fog lefutni. Az around() segítségével pedig mérek, mivel a közepén a proceed()-del meg tudom hívni magát a hívandó metódust.
+		</para>
+		<para>
+			Lássuk ugyanezt Spring AOP-vel! Ezt már a közös repót követve csináltam, úgy egyszerűbb volt. A kódot átszerveztem úgy, hogy egy külön osztály (Measurement) végezze el a benchmarkolást, hogy megfelelően rá tudjak hookolni. A core concept itt is ugyanaz. Létrehoztam egy annotációt, a @NeedsMeasuring-et, majd létrehoztam egy Aspect-et, amit meg kellett jelöljek az @Aspect annotációval. Itt létre kellett hozzak egy timeAnnotatedMethod() metódust, amit megjelöltem az @Around annotációval, tehát ez hasonló lesz az előbb látott around() metódushoz - olyannyira, hogy a tartalma ugyanaz:
+			<programlisting language="java"><![CDATA[
+@Aspect
+@Service
+public class NeedsMeasuringAspect {
+
+    @Around("@annotation(hu.unideb.prog2.NeedsMeasuring)")
+    public Object timeAnnotatedMethod(ProceedingJoinPoint pjp) throws Throwable {
+        long before = System.nanoTime();
+        Object retVal = pjp.proceed();
+        long after = System.nanoTime();
+        System.out.println(String.format("The entire measurement took %d ms.", (long) (after - before) / 1000000));
+        return retVal;
+    }
+}
+			]]></programlisting>
+			És minden működött ugyanúgy.
+		</para>
+		<para>
+			Az AspectJ kódot a book-sources mappába tettem listbench-aspectj néven, a Spring AOP kódot szintén a book-sources mappába tettem, de listbench-springaop néven.
 		</para>
 	</section>
 </chapter>
