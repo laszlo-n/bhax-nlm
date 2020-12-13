@@ -20,9 +20,56 @@
 	<section>
 		<title>EPAM: Back to the Future</title>
 		<para>
-			Amikor először nekiláttam a feladatnak, láttam egy hármaspontot a sleep() metódus törzseként - feltételeztem hogy ki kell cserélni egy threaded sleepre. Végülis ha a metódusom megkapja paraméterként mennyit altasson az aktuális szálon, az egész már csak 1 sor, nem igaz? Dehogynem (a rudimentary kivételkezelést leszámítva, mivel checked kivételt dobhat a Thread.sleep()), úgyhogy így is tettem, a világ összes aznapra maradt naivitását felhasználva:
+			<emphasis>A feladat:</emphasis> Adott az alábbi kódrészlet, mi lesz kiíratva a standard kimenetre és miért?
 			<programlisting language="java"><![CDATA[
-/** * * @param sleeptime sleep time in milliseconds */
+class FutureChainingExercise {
+
+    private static ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+    public static void main(String[] args) {
+        CompletableFuture<String> longTask
+                = CompletableFuture.supplyAsync(() -> {
+            sleep(1000);
+            return "Hello";
+        }, executorService);
+        CompletableFuture<String> shortTask
+                = CompletableFuture.supplyAsync(() -> {
+            sleep(500);
+            return "Hi";
+        }, executorService);
+        CompletableFuture<String> mediumTask
+                = CompletableFuture.supplyAsync(() -> {
+            sleep(750);
+            return "Hey";
+        }, executorService);
+        CompletableFuture<String> result
+                = longTask.applyToEitherAsync(shortTask, String::toUpperCase, executorService);
+        result = result.thenApply(s -> s + " World");
+        CompletableFuture<Void> extraLongTask
+                = CompletableFuture.supplyAsync(() -> {
+            sleep(1500);
+            return null;
+        }, executorService);
+        result = result.thenCombineAsync(mediumTask, (s1, s2) -> s2 + ", " + s1, executorService);
+        System.out.println(result.getNow("Bye"));
+        sleep(1500);
+        System.out.println(result.getNow("Bye"));
+        result.runAfterBothAsync(extraLongTask, () -> System.out.println("After both!"), executorService);
+        result.whenCompleteAsync((s, throwable) -> System.out.println("Complete: " + s), executorService);
+        executorService.shutdown();
+    }
+
+    /**
+     *
+     * @param sleeptime sleep time in milliseconds
+     */
+    private static void sleep(int sleeptime) {...}
+}
+			]]></programlisting>
+		</para>
+		<para>
+			Amikor először nekiláttam a feladatnak, láttam a hármaspontot a sleep() metódus törzseként - feltételeztem hogy ki kell cserélni egy thread sleepre. Végülis ha a metódusom megkapja paraméterként mennyit altasson az aktuális szálon, az egész már csak 1 sor, nem igaz? Dehogynem (a rudimentary kivételkezelést leszámítva, mivel checked kivételt dobhat a Thread.sleep()), úgyhogy így is tettem, a világ összes aznapra maradt naivitását felhasználva:
+			<programlisting language="java"><![CDATA[
 private static void sleep(int sleeptime) {
     try {
         Thread.sleep(sleeptime);
@@ -48,6 +95,73 @@ Bye
 Bye
 			]]></programlisting>
 			Mivel ugye eddig még nem olvastam bele magába a példakódba, ez engem eléggé meglepett. Rátaláltam a turpisságra, mondhatni. Innen viszont nem volt hova tovább, muszáj volt nekiállni, és felgöngyölíteni a forráskódot - és vele együtt az órán nem tárgyalt concurrencyhez használt osztályokat, amiket órán kihagytunk.
+		</para>
+		<para>
+			A Java-beli async/tasks/futures rendszer nagyon hasonlít minden más ilyen rendszerhez más nyelvekben és keretrendszerekben. Van egy objektumunk, amire taskokat lehet aggatni, be lehet állítani mekkora threadpool fusson alatta (hány szálra szórja szét a taskokat), és ezeket a taskokat future-ökként tovább tudjuk fűzni, be tudjuk várni, és a többi. Ebben a nyelvben az ExecutorService interfész fogja biztosítani nekünk a taskok menedzselését. Egy ExecutorService implementációt az Executors egy statikus factory methodja fog nekünk kreálni, ez a példakód egy fix számú szálból álló threadpoolt használ, max. két szállal egyidejűleg.
+		</para>
+		<para>
+			Röviden a Future objektumokról then. A Future objektum egy "jövőt", jövőbeli objektumot jelöl, ami akkorra készül el, amikorra az általunk definiált task lefut aszinkron. A Future.get() bevárja ezt a jövőt, és kiszedi nekünk ezt az objektumot az adott taskból - persze ehhez az aktuális threadünket blokkolva kell tartsa. A CompleteableFuture ennek egy kiterjesztett változata, ami lehetőséget ad arra, hogy a különböző jövőkből kialakuló lehetséges állapotokról reasonölni tudjunk, és össze tudjuk őket megfelelően fűzni, a köztes állapotot tároló CompletionStage osztály metódusainak a segítségével (ez az ún. monadikus pattern, gyakori pattern funkcionális programozásban).
+		</para>
+		<para>
+			De akkor nézzük is pontosan mit csinál a kód! Kezdésnek tegyük fel, hogy a sleep() metódusunk valóban implementál egy Thread.sleep()-et, és tényleg alszanak a szálak amikor meghívják ezt a metódust. Első körben létrehozunk 3 aszinkron taskot, longTask, shortTask és mediumTask néven, különböző nagyságú sleepekkel. Ezt követi egy result nevű CompletableFuture, aminek az eredményét az applyToEitherAsync() úgy adja meg, hogy ha valamelyik a két task közül lefut, akkor arra alkalmazza a neki passzolt metódust (itt a touppercase-t). Ezután ráchainelünk egy lambda functiont a result future-re, ami kiegészíti egy " World"-del a visszakapott stringet, majd ha meglesz.
+		</para>
+		<para>
+			Ugorjuk át az extraLongTask-ot, és ismét a result-ot chaineljük: a thenCombineAsync() bevárja a result-ot, és a mediumTask-ot is, majd a kettő eredményét konkatenálja. Fontos, hogy most még a taskunk nem feltétlenül fut, vagy fejeződött be, egyik sem.
+		</para>
+		<para>
+			Épp emiatt viszont, ha ráhívunk a result.getNow()-ra, ami kikényszeríti a jelenlegi (main) threadet hogy gyűjtse be a future jelenleg elérhető állapotát, mivel ekkor még nem telt el elég idő a fő szálon, a result chainból nem futott le még semmi, így a paraméterként átadott "Bye" lesz kiíratva. Tudjuk, hogy az applyToEitherAsync() tud választani két task eredménye között is, ha van egy ami elkészült legalább, szóval mi történik ha ide beteszünk egy 550 ms-os sleepet?
+			<programlisting language="java"><![CDATA[
+sleep(550);
+System.out.println(result.getNow("Bye"));
+			]]></programlisting>
+			A válasz: nagy büdös semmi :). Úgy tűnik, hogy ha a longTask tovább tart, mint az applyToEitherAsync()-nek átadott other task, akkor a választás akkor fog megtörténni, ha a longTask már lefutott. Ez azt jelenti, hogy a shortTask eredménye csak akkor lesz letárolva, ha valami miatt a longTask sikertelenül zárul le, nem pedig akkor, ha gyorsabb nála.
+		</para>
+		<para>
+			Ezek után vár a kód 1500 ms-t, de igazából 1300 ms is bőven elég. A teljes chainünk ugyanis összesen 500 ms + 750 ms várakozást tartalmaz, úgyhogy ha ehhez rádobunk kb. 50 ms extrát a biztonság kedvéért, garantáltan lefut már a teljes chain. És valóban, ha csak 1250-re állítjuk a várakozást, ott vagyunk mintha a sleep()-et üresen hagytuk volna.. vagy legalábbis majdnem, de közel:
+			<programlisting><![CDATA[
+Bye
+Bye
+			]]></programlisting>
+			Fun fact, először ez nekem továbbra is a helyes eredményt adta, subsequent futtatások során viszont már ezt, szóval a race condition nagyon is létezik.
+		</para>
+		<para>
+			A következő getNow() a sleep után tehát szépen begyűjti a result-ot, ami mivel elég idő telt el a felchainelt taskok lefutásához, vissza is adja a legkódolt eredményt, a "Hey, HELLO World"-öt. De a következő sor már érdekes. Azt írja, runAfterBothAsync(), és az extra long task van oda megadva, amit átugrottunk eddig, de igazából csak egy sima 1500 ms-os sleep. Mégis, ha csak simán lefuttatjuk a programot, az "After both!" sose kerül kiíratásra. Miért van ez? Nos azért, mert az extraLongTask-ot igazából sose várjuk be; csupán hozzadjuk a chainhez és robogunk tovább.
+		</para>
+		<para>
+			A whenCompleteAsync() egyértelmű, ha meglett a result eredménye so far, lefut, ha nem, nem. Márpedig ha a "Hey, HELLO World" már kiíratásra került, akkor ez mindig biztosan le fog futni. Ezután a programunk az executorService leállításával zárul, és itt meg is magyarázódik az "After both!" hiánya. Az a task, amit az "extraLongTask után kötöttünk" már nem lesz futtatásra ítélve, mivel már ki lett adva a shutdown() - ami azt teszi, hogy a már futó taskokat bevárja, és aztán leállítja a service-t, ezzel soha le nem futtatva az "After both!" kiíratását. Tehát ha úgy módosítjuk a kódot, hogy:
+			<programlisting language="java"><![CDATA[
+result.runAfterBothAsync(extraLongTask, () -> System.out.println("After both!"), executorService);
+result.whenCompleteAsync((s, throwable) -> System.out.println("Complete: " + s), executorService);
+sleep(1500);
+executorService.shutdown();
+        	]]></programlisting>
+        	... akkor ki lesz írva az "After both!", minden probléma nélkül.
+		</para>
+		<para>
+			Zárásképp fedjük fel, mi történt amikor nem volt implementálva a sleep(). Ekkor a longTask azonnal lefutott, ahogy a mediumTask is, szóval felmerülhet bennünk, hogy miért nem jött ki a helyes eredmény. Nos azért, mert a futtatás is időbe kerül, ami nem 0 ms, szóval race conditionünk van. Hozzunk létre egy másik sleepet, amivel bevárjuk majd a futtatást a két getNow() között, egy pici delay értékkel (legyen mondjuk sleep2())!
+			<programlisting language="java"><![CDATA[
+private static void sleep2(int sleeptime) {
+    try {
+        Thread.sleep(sleeptime);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+        	]]></programlisting>
+        	A módosított rész:
+        	<programlisting language="java"><![CDATA[
+System.out.println(result.getNow("Bye"));
+sleep2(50);
+System.out.println(result.getNow("Bye"));
+        	]]></programlisting>
+        	Az eredmény:
+        	<programlisting><![CDATA[
+Bye
+Hey, HELLO World
+After both!
+Complete: Hey, HELLO World
+			]]></programlisting>
+			Mint láthatjuk valóban, csak egy sima race conditionről volt szó. Olyannyira gyorsan lefut in fact, hogy a másik race condition a shutdown() előtt már nemhogy nem alakul ki, de az "After both!" egyenesen a "Complete" előtt íródik ki! Mint láthatjuk tehát, minden úgy működik, ahogy az eddigi bekezdésekben is tárgyaltuk, csak pepitában.
 		</para>
 	</section>
 	<section>
