@@ -8,7 +8,122 @@
 	<section>
 		<title>EPAM: DI</title>
 		<para>
-			Órán megcsináltuk, dokumentáció todo soon™.
+			<emphasis>A feladat:</emphasis> Implementálj egy alap DI (Dependency Injection) keretrendszert Java-ban annotációk és reflexió használatával megvalósítva az IoC-t (Inversion Of Control).
+		</para>
+		<para>
+			<emphasis>Megjegyzés:</emphasis> Ezt a feladaton egy órán közösen oldottuk meg, így a közös kódbázist húztam be (minimális változtatásokkal, ld. pl. DiContextImpl), és annak a működéséről fogok most írni. A kódot a book-sources mappába tettem difw néven.
+		</para>
+		<para>
+			Mi is az a dependency injection? Nagyon tömören megfogalmazva az, ahogyan egy, az objektum által szükséges másik objektumot, beállítunk neki. Tegyük fel, hogy van egy osztályunk, aminek a konstruktorában mi létrehozunk számos objektum instance-ot, amikkel aztán dolgozhat az objektumunk. Megeshet azonban, hogy azt, hogy hogyan hozzuk létre ezeket az objektumokat, mi meg akarjuk szabni, például tesztelés során. Ez problémát okoz akkor, hiszen szorosan kapcsolódik az általunk tesztelni kívánt osztály egy másik osztályhoz, nem tudjuk befolyásolni tisztán, hogy hogyan állítsa elő a konstruktorában a dependenciáját. Példa (stackoverflowról csenve, ld. <link xlink:href="https://stackoverflow.com/questions/130794/what-is-dependency-injection">https://stackoverflow.com/questions/130794/what-is-dependency-injection</link>):
+			<programlisting language="java"><![CDATA[
+public SomeClass() {
+	this.myObject = Factory.getObject();
+}
+			]]></programlisting>
+			Van egy SomeClass nevű osztályunk, aminek a myObject nevű fieldjét be szeretnénk állítani - és van is rá egy Factory-nk. De mi van akkor, ha több Factory-nk is van, vagy van valamilyen más mód ahogy azt be szeretnénk épp állítani, vagy mockolt objektumot szeretnénk oda beállítani a másik osztály valódi felhasználása helyett? Ilyenkor jöhet képbe pl. az ún. Constructor Injection (<link xlink:href="https://martinfowler.com/articles/injection.html#FormsOfDependencyInjection">https://martinfowler.com/articles/injection.html#FormsOfDependencyInjection</link>):
+			<programlisting language="java"><![CDATA[
+public SomeClass (MyClass myObject) {
+	this.myObject = myObject;
+}
+			]]></programlisting>
+			Nagy varázslatra nem kell gondolni, mindössze annyiról van szó, hogy paraméterként kapja meg az osztály a függőségeit, amit aztán a konstruktorban beállít magának. Általában ez van annyira logikus, hogy jobb módszer a híján egy hozzám hasonló kezdő is felfedezze magától. :)
+		</para>
+		<para>
+			Ha egy kicsit megpróbálunk generalizálni then, arról van szó, hogy minden objektumnak vannak dependenciái, és mi ezeket akarjuk nekik átadni, "injektálni". Emiatt jött aztán az ötlet, hogy mi lenne, ha az injektálandó objektumokat kiszerveznénk <emphasis>konfigurációkba</emphasis>, majd lenne egy olyan objektumunk, egy kvázi összeszerelő (= assembler, de nem az alacsony szintű prog féle assembler) objektumunk, ami valamilyen módon (például egy ilyen konfiguráció alapján) megkeresi, hogyan kell ezeket a dependenciákat előállítani, és valamilyen injection stílus mentén be is injektálja nekünk őket.
+		</para>
+		<para>
+			Ha már sikerült ennyire általánossá tennünk a látószögünket, nézzük át milyen ilyen "stílusok" léteznek dependencia injektálásra. Alapvetően hármat különböztetünk meg:
+			<itemizedlist>
+				<listitem>
+					<para>konstruktoros injektálás (Type 3 IoC)</para>
+				</listitem>
+				<listitem>
+					<para>setter-es injektálás (Type 2 IoC)</para>
+				</listitem>
+				<listitem>
+					<para>interfész alapú injektálás (Type 1 IoC)</para>
+				</listitem>
+			</itemizedlist>
+			Az előző bekezdések egyikében a Type 3, azaz konstruktoros injektálásra (constructor injection) láthattunk példát. Mielőtt végignéznénk ezeket, érdemes kitérőt tenni arra, hogy mi az az IoC cucc ott a zárójelekben. Ez az Inversion of Control rövidítése, azaz "a vezérlés megfordítása" koncepcióé. Ez az elv <emphasis>ezesetben</emphasis> arról szól, hogy egy osztály ne állítsa be a saját függőségeit statikjusan, hanem bízza rá ezt valamilyen más objektumra (az az objektum lesz a DI framework maga, ami belehív majd a dependens osztályokba hogy előállítsa a számunkra szükséges objektumokat). Ezt az elvet a SOLID elvekből az ötödik inspirálta, amiről a könyvben korábban is említést tettem, ez az ami arról szól, hogy az osztályok ne specifikus implementációkon, hanem absztrakciókon kell függjenek. Általánosabban ahol olyat lát az ember hogy callbackek, executor service-ek, event loopok, eventek, bindingok, stb. ott mind-mind inversion of control van. Jó példa erre amikor GUI programozás során az ember leimplementálja hogy egy adott gomb megnyomására milyen kód fusson, de azt a kódot már a GUI framework fogja meghívni és futtatni, nem pedig mi. További olvasásra: <link xlink:href="https://martinfowler.com/bliki/InversionOfControl.html">https://martinfowler.com/bliki/InversionOfControl.html</link>
+		</para>
+		<para>
+			Összesítsük végre akkor a DI előnyeit és hátrányait!
+			Az előnyök:
+			<itemizedlist>
+				<listitem>
+					<para>segít a unit tesztelésben</para>
+				</listitem>
+				<listitem>
+					<para>csökkenti a boilerplate kódot, mivel a dependencyk inicializálása egységesen történik</para>
+				</listitem>
+				<listitem>
+					<para>megkönnyíti a kódbázis kiterjesztését</para>
+				</listitem>
+				<listitem>
+					<para>elősegíti a laza couplingot</para>
+				</listitem>
+			</itemizedlist>
+			A hátrányok:
+			<itemizedlist>
+				<listitem>
+					<para>meglehetősen komplex témakör és technika</para>
+				</listitem>
+				<listitem>
+					<para>sok probléma amit fordításidőben is el lehetne kapni emiatt futásidőben fog jelentkezni</para>
+				</listitem>
+				<listitem>
+					<para>mivel az ehhez szükséges frameworkök reflectiont használnak, ez akadályozhatja az IDE-k bizonyos kódolást segítő funkcióit</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			Most hogy az alapokkal megvagyunk, és már meg is néztük a konstruktoros injektálást, haladjunk tovább a setter-es injektálásra. A setter-es injektálás mindössze annyit jelent, hogy setter metódusokon keresztül állítjuk be a dependenciáinkat. Ha Spring Frameworköt használnánk például DI-ra, akkor egy XML-ben definiálnánk milyen osztály milyen settereihez milyen dependenciákat akarunk hozzárendelni. Esetünkben valahogy így nézne ez ki:
+			<programlisting language="xml"><![CDATA[
+<beans>
+    <bean id="SomeClass" class="spring.SomeClass">
+        <property name="myObject">
+            <ref local="MyClass"/>
+        </property>
+    </bean>
+</beans>
+			]]></programlisting>
+			Ezt pedig valahogy így futtattnánk meg:
+			<programlisting language="java"><![CDATA[
+public void testWithSpring() throws Exception {
+    ApplicationContext ctx = new FileSystemXmlApplicationContext("spring.xml");
+    SomeClass someClass = (SomeClass) ctx.getBean("SomeClass"); // begyűjtötte a konfigfájl alapján a megfelelő osztálypéldányt és beinjektálta
+    someClass.doStuff();
+}
+			]]></programlisting>
+			Mivel az általunk közösen írt pici DI framework is ezt a megközelítést használja, csak XML helyett configurator osztállyal, így az interfész alapú injektálást most mellőzöm. Martin Fowler korábban hivatkozott oldalán azonban kiválóan lehet olvasni róla.
+		</para>
+		<para>
+			Kezdjük a konfigurációnkkal. A konfigurációs osztályunk ún. beaneket fog tartalmazni, esetünkben ezek lesznek azok a metódusok, amik egy-egy objektumot előállítanak nekünk. A <emphasis>DI kontextusunkból</emphasis> ezeket a beaneket aztán elő tudjuk szedni majd, vagy a nevük (metódusnév vagy @Qualifier alapján), vagy az általuk biztosított osztály alapján. Ehhez van egy biankó Configuration interfészünk, egy @Bean és egy @Qualifier annotációnk. A mellékelt unit tesztben látható egy példakonfigurációs osztály, ContextConfig néven. Ezt a konfigurációt majd példányosítjuk...
+			<programlisting language="java"><![CDATA[
+private DiContext context = new DiContextBuilder().build(new DiContextImplIntegrationTest.ContextConfig());
+			]]></programlisting>
+			... és átadjuk a DI frameworkünk kontextus építőjének, aki bejárja majd, kikeresi a benne lévő Beaneket, és meghívva őket dependenciákat állít elő, amiket eltárol, és biztosít ha kérjük.
+		</para>
+		<para>
+			Nézzük akkor meg, mit is tud egy DI kontextus. A kontextushoz hozzá lehet adni beaneket, illetve ki lehet szedni belőle kész objektumokat vagy azonosító (és osztály), vagy csak (osztály)típus alapján. Az osztálytípust mindenképp meg kell határoznunk, hogy tudjuk, milyen objektumot adjunk vissza.
+		</para>
+		<para>
+			A DiContextImpl osztályban then van két Map field. Az egyik String - Object párokat tárol, azaz az azonosítókat, és a hozzájuk tartozó Beaneket. A másik Map pedig az osztálytípus-alapú kiszolgálásra van, egy osztályhoz egy vagy több beanből álló mappingeket tárol. Az addBean() ennek mentén pontosan azt csinálja, amit gondolnánk, hozzáadja a beaneket a neki átadott bean név és bean referencia alapján mindkét maphoz.
+		</para>
+		<para>
+			Ha ki akarunk szedni egy bean által előállított objektumot a kontextusból, azt név alapján előkutatja nekünk a kontextust tartalmazó mapból, és castolja nekünk a céltípusra. Ha az osztálytípus alapú lekérést használjuk, és több bean is el van tárolva egy adott osztálytípusból, kivételt kapunk.
+		</para>
+		<para>
+			Végül nézzük meg akkor, hogyan építjük fel a kontextust, és állítjuk elő a konfigurációból, a beaneken át, a kész objektumokat (DiContextBuilder osztály lesz a befutó itt)! Meglepően straightforward. A build() metódus a fő mozgatórugója az egésznek; létrehozunk benne egy üres kontextust, feltöltjük "BeanDefinition"-ökkel, végrehajtjuk a Beaneket, az eredményeikkel populáljuk az addig-biankó kontextust, és visszaadjuk a végeredményt.
+		</para>
+		<para>
+			BeanDefinition alatt a bean metódus nevét, visszatérési értékének típusát, magát a metódust, és annak minden dependenciáját értjük. A bean dependendciák különösen fontosak, elvégre amíg nincs előállítva amire a beanünknek szüksége van, addig a beanünk sem tudja előállítani amit ő akar. :) Ehhez egy belső listát tartunk fent, amiben BeanDefinitionParameter-ek vannak, amik egy névből (a paraméter nevéből, vagy a Qualifier-rel megadott névből), valamint a paraméter típusából adódnak. 
+		</para>
+		<para>
+			Az első bean amit hozzáadunk a kontextushoz, az saját maga, meglepő módon talán. Ezután elkezdjük feloldani a bean függőségeket, és előállítani a valódi beanjeinket. Egy belső listában eltároljuk a BeanDefinitionöket, amiket már feloldottunk. Ezután végigmegyünk minden beandefinition-ön, és <emphasis>ha feloldható</emphasis>, <emphasis>feloldjuk</emphasis>. A kész beaneket a kontextushoz hozzáadjuk, a feloldott beandefinition-öket letároljuk. Miután befejeztük ezt a keresést, kiszedünk minden már feloldott beandefinitiont a beandef listánkból. Ezek után megnézzük, hogy az eredeti bean defek számához képest mennyink van. Ha ugyanannyi, akkor valahol körkörös dependencia van, és exceptiönt dobunk, ha kevesebb, igazítjuk a számot, és megpróbáljuk begyűjteni a maradék definíciót. Amint ez megvan, kész a kontextusunk.
+		</para>
+		<para>
+			Mielőtt végeznénk is viszont, érdemes kitérni az, hogy mit takar a feloldhatóság és a feloldás művelete. Előbbit a isBeanDefinitionResolvable() metódus vizsgálja, úgy, hogy megnézi hogy a kontextusban van-e már objektum, ami kiszolgálhatná az igényt. Feloldani pedig a createBean() fog, ami annyit tesz, hogy meghívja a bean metódusát, és tömbként átadja az összes dependenciáját. Ennyi lenne hát a Dependency Injection.
 		</para>
 	</section>
 	<section>
@@ -17,21 +132,120 @@
 			A JSON a JavaScript Object Notion rövidítése, amely egy szabvány ami a JavaScript objektumok leírásának a módját definiálja. Az évek során ez a standard az internetes kommunikáció egyik alapköve lett, mivel rendkívül könnyedén lehet JSON-ba szerializálni, és onnan deszerializálni objektumokat, típuskezelése kényelmes, jelölése rugalmas és könnyedén olvasható emberek számára is (sokkal jobban, mint pl. az XML).
 		</para>
 		<para>
-			A jelenlegi legfrissebb verzió a szabványból 2017-es, méghozzá az ISO/IEC 21778:2017 szabvány az. Ez a dokumentum leírja a JSON dokumentumok pontos szintaktikai szabályait, amelyek lehetővé teszik azok helyes feldolgozását. Fontos kiemelni, hogy míg a szintakszis kötött, a dokumentumok sémája rugalmas, így bármilyen objektumot leírhatunk velük, de a parser mindig lehet ugyan az. Ez megkülönböztetti mondjuk egy egyedi adattároló formátumtól, ami pl. csak egy bizonyos fajta objektumot tárolhat.
+			A jelenlegi legfrissebb verzió a szabványból 2017-es, méghozzá az RFC 8259 szabvány az. Ez a dokumentum leírja a JSON dokumentumok pontos és precíz szintaktikai szabályait, amelyek lehetővé teszik azok helyes feldolgozását. Fontos kiemelni, hogy míg a szintakszis kötött, a dokumentumok sémája rugalmas, így bármilyen objektumot leírhatunk velük, de a parser mindig lehet ugyan az. Ez megkülönböztetti mondjuk egy egyedi adattároló formátumtól, ami pl. csak egy bizonyos fajta objektumot tárolhat.
 		</para>
 		<para>
-			Ha már említést tettem a sémákról, fontos kiemelni továbbá azt is, hogy itt a sémavalidáció (azaz hogy egy dokumentumban leírt objektum/objektumhalmaz megfelel-e egy sémának) már nem sztenderdizált, mint mondjuk az XML esetében. Erre is vannak módszerek, de annak még nem néztem utána (TODO). További sajátossága a formátumnak, hogy az XML-el ellentétben itt kommenteket nem lehet elhelyezni - viszont vannak olyan kiegészítő szabványok (pl. JSON 5) amelyek kiterjesztik a JSON szabványt úgy, hogy lehessen.
+			Ha már említést tettem a sémákról, fontos kiemelni továbbá azt is, hogy itt a sémavalidáció (azaz hogy egy dokumentumban leírt objektum/objektumhalmaz megfelel-e egy sémának) még nem sztenderdizált, mint mondjuk az XML esetében; nincsenek DTD-hez hasonló séma-leírók - helyette 3rd party libraryk adnak lehetőségeet sémavalidációra. Jelenleg van egy IETF internetes draft, a JSON Schema és a JSON Hyper-Schema, amik ezt az igényt kívánják kiszolgálni (ld. <link xlink:href="https://json-schema.org/">https://json-schema.org/</link>). További sajátossága a formátumnak, hogy az XML-el ellentétben itt kommenteket nem lehet elhelyezni - viszont vannak olyan kiegészítő szabványok (pl. JSON 5) amelyek kiterjesztik a JSON szabványt úgy, hogy lehessen.
 		</para>
 		<para>
-			Kód: TODO
+			Serializerből nagyon sok van, a legnépszerűbbek a Google GSON-ja, és a FasterXML Jackson libraryje. Mindkettő képes úgy szerializációra, mint deszerializációra, valamint a Jackson képes sémavalidációra is. A közös repóba feltett unit tesztek a Jackson kimenete ellen tesztelik a kódot, amit készítettem. A kódomat végül a közös repóban lévő megoldás alapján írtam meg, mert megtetszett az architektúrája, és mire jobban elgondolkoztam hogy mit is csinálok, a nagyját már teljesen átemeltem és reimplementáltam. Kiegészítettem viszont teljes Collection, Map, és tömb támogatással, úgyhogy mostmár bármilyen Java típusból lehet JSON-ba szerializálni a segítségével. Készítettem egy saját dummy osztályt is, ami kicsit brutálisabb a kiadott unit tesztnél. A kódot a book-sources mappába tettem jason néven.
 		</para>
 	</section>
 	<section>
 		<title>EPAM: Kivételkezelés</title>
 		<para>
-			Minden esetben a megfelelő elágazás ág fut le. Ha az input null, akkor a legelső instanceof hamist ad, így a legutolsó else ág fut le, amihez a megfelelő catch block az utolsó. És igen, a finally ág mindig lefut.* (Kivételek: https://stackoverflow.com/questions/65035/does-a-finally-block-always-get-executed-in-java)
+			<emphasis>A feladat:</emphasis> Adott az alábbi kódrészlet. Mi történik, ha az input változó 1F, “string” vagy pedig null? Meghívódik e minden esetben a finally ág? Válaszod indokold!
+			<programlisting language="java"><![CDATA[
+public class ExceptionExercise {
 
-			TODO: bővíteni
+    private class ParentException extends RuntimeException { }
+
+    private class ChildException extends ParentException { }
+
+    public static void main(String[] args) {
+        var testObj = new ExceptionExercise();
+        testObj.test(1F);
+//      testObj.test("string");
+//      testObj.test(null);
+    }
+
+    public void test(Object input) {
+        try {
+            System.out.println("Try!");
+            if (input instanceof Float) {
+                throw new ChildException();
+            } else if (input instanceof String) {
+                throw new ParentException();
+            } else {
+                throw new RuntimeException();
+            }
+        } catch (ChildException e) {
+            System.out.println("Child Exception is caught!");
+            if (e instanceof ParentException) {
+                throw new ParentException();
+            }
+        } catch (ParentException e) {
+            System.out.println("Parent Exception is caught!");
+            System.exit(1);
+        } catch (Exception e) {
+            System.out.println("Exception is caught!");
+        } finally {
+            System.out.println("Finally!");
+        }
+    }
+}
+			]]></programlisting>
+		</para>
+		<para>
+			Mielőtt lefuttatnánk a kódot, gondoljuk át! A try-catch-finally vezérlési szerkezet úgy működik, hogy amint a eldobódik a try-ban egy kivétel, rögtön a legközelebbi, azt a kivételt kezelni képes, catch ág fog lefutni. A "kezelni képes" azt jelenti, hogy az eldobott kivétel osztálya megegyezik a catch-ben várt exception objektum osztályával, vagy annak az osztálynak egy leszármazottja (azaz ha instanceof viszony van köztük). Ezt a JLS 11.3-as pontja definiálja: <link xlink:href="https://docs.oracle.com/javase/specs/jls/se13/html/jls-11.html#jls-11.3">https://docs.oracle.com/javase/specs/jls/se13/html/jls-11.html#jls-11.3</link>.
+		</para>
+		<para>
+			Azonban van néhány különlegesség is a példában. Az egyik az exception throwing egy catch ágban. Mivel az exception nem egy try-catch szerkezetben dobódott el, a <emphasis>hívó</emphasis>nak kell kezelnie a catch-ben eldobott kivételt - mivel nekünk a mainben nincs ilyen guard, így a kivétel kezeletlenül marad, és a JVM-ig dobódik el, ami le fogja állítani az egyetlen szálat, amin az alkalmazásunk fog. 
+		</para>
+		<para>
+			A másik érdekesség a <emphasis>System.exit(1)</emphasis> a második catch blokkban. Ha egy kicsit barangolunk az interneten, láthatjuk (<link xlink:href="https://stackoverflow.com/questions/65035/does-a-finally-block-always-get-executed-in-java">https://stackoverflow.com/questions/65035/does-a-finally-block-always-get-executed-in-java</link>), hogy több speciális eset van, ahol a finally minden várakozás ellenére sem fog lefutni. Ezek a következők lehetnek:
+			<itemizedlist>
+				<listitem>
+					<para>ha meghívásra kerül a <emphasis>System.exit()</emphasis> (bingó!)</para>
+				</listitem>
+				<listitem>
+					<para>ha meghívásra kerül a Runtime.getRuntime().halt(exitStatus) (hasonló az előzőhöz)</para>
+				</listitem>
+				<listitem>
+					<para>ha a JVM vagy a host machine összeomlik vagy kifagy mielőtt a finally blokk futhatna</para>
+				</listitem>
+				<listitem>
+					<para>ha az alkalmazásunkat valaki forced módon leállítja</para>
+				</listitem>
+				<listitem>
+					<para>ha a finally szálat egy ún. daemon szál hajtaná végre, és már nincs belőlük egy se (ezt most ugorjuk)</para>
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			Összegezzük tehát a várakozásainkat! Ha 1F-et adunk át, azt várjuk, hogy az első elágazást tegye meg a programunk, ami során egy ChildException dobódik el. A ChildException gyermekosztálya a ParentException-nek, így az első catch blokkbban lévő elágazás mindig igaznak értékelődik ki, tehát el lesz dobva egy ParentException is. Ezt mi már nem kezeltük le viszont, szóval a JVM ezzel fog végül elszállni. Mielőtt ezt tenné viszont, végre fog hajtódni a finally blokk. Nézzük igazunk lesz-e!
+			<programlisting><![CDATA[
+Try!
+Child Exception is caught!
+Finally!
+Exception in thread "main" ExceptionExercise$ParentException
+	at ExceptionExercise.test(ExceptionExercise.java:27)
+	at ExceptionExercise.main(ExceptionExercise.java:9)
+
+Process finished with exit code 1
+			]]></programlisting>
+			Pontosan az történt amit prediktáltunk, mehetünk tovább.
+		</para>
+		<para>
+			Ha stringet adunk át, a második águnk lesz igaz a try blokkban. Ez egy ParentException-t dob, amit a catch blokkok sorrendje és a fent említett instanceof szabály miatt a második catch blokk fog elkapni. Ez végül ez System.exit()-tel zárul, aminek következtében a finally blokk nem fog lefutni. Lássuk valóban-e!
+			<programlisting><![CDATA[
+Try!
+Parent Exception is caught!
+
+Process finished with exit code 1
+			]]></programlisting>
+			Ismét minden úgy történt, ahogy prediktáltuk. A programunk csendesen leállt egy hibakóddal.
+		</para>
+		<para>
+			Végül pedig ha null-t adunk át, akkor az utolsó catch blokk fog lefutni, amiben semmi különleges behaviour nincs, szóval a finally blokk is kényelmesen lefut, és a programunk végül helyesen terminál, kivétel dobása nélkül (a main() már nem fog kivételt kapni). Ellenőrizzük le ezt is!
+			<programlisting><![CDATA[
+Try!
+Exception is caught!
+Finally!
+
+Process finished with exit code 0
+			]]></programlisting>
+			És a harmadik eset is úgy történt, ahogy vártuk - a kivétel kezelve lett, a finally blokk végre lett hajtva, és a main()-be már nem került semmilyen kivétel kidobásra. Emellett ez az egyetlen eset, ahol a programunk "jó", azaz nullás hibakóddal terminált, ami konvenció szerint (<link xlink:href="https://en.wikipedia.org/wiki/Exit_status">https://en.wikipedia.org/wiki/Exit_status</link>) azt jelöli, hogy nem történt hiba.
 		</para>
 	</section>
 </chapter>
